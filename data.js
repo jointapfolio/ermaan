@@ -54,10 +54,13 @@ const clientData = {
   // generates a real .vcf file in the browser (no server needed)
   // and triggers a download using this phone/email + the profile
   // name/title above.
+  //
+  // Values are Base64-encoded to deter automated scrapers.
+  // The render engine decodes them at runtime with atob().
   // --------------------------------------------------------------
   vcard: {
-    phone: "+60167127869",
-    email: "ermaan1970@gmail.com"
+    phone_b64: "KzYwMTY3MTI3ODY5",          // Base64 of "+60167127869"
+    email_b64: "ZXJtYWFuMTk3MEBnbWFpbC5jb20=" // Base64 of "ermaan1970@gmail.com"
   }
 
 };

@@ -283,14 +283,18 @@
       const firstName = parts[0] || "";
       const lastName = parts.slice(1).join(" ");
 
+      // Decode obfuscated contact details at runtime
+      const phone = atob(vcard.phone_b64);
+      const email = atob(vcard.email_b64);
+
       const vcf = [
         "BEGIN:VCARD",
         "VERSION:3.0",
         `N:${lastName};${firstName};;;`,
         `FN:${profile.name}`,
         `TITLE:${profile.title}`,
-        `TEL;TYPE=CELL:${vcard.phone}`,
-        `EMAIL:${vcard.email}`,
+        `TEL;TYPE=CELL:${phone}`,
+        `EMAIL:${email}`,
         "END:VCARD"
       ].join("\n");
 
