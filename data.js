@@ -59,8 +59,8 @@ const clientData = {
   // The render engine decodes them at runtime with atob().
   // --------------------------------------------------------------
   vcard: {
-    phone_b64: "KzYwMTY3MTI3ODY5",          // Base64 of "+60167127869"
-    email_b64: "ZXJtYWFuMTk3MEBnbWFpbC5jb20=" // Base64 of "ermaan1970@gmail.com"
+    phone_b64: "KzYwMTY3MTI3ODY5",          // Base64 
+    email_b64: "ZXJtYWFuMTk3MEBnbWFpbC5jb20=" // Base64 
   }
 
 };
