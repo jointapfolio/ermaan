@@ -11,7 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* TRIPLE CHECKED: Background is entirely transparent. No CSS stretching hacks. */
+        /* REVERTED: Back to the exact code that worked perfectly. No custom video stretching. */
         body,
         html {
             margin: 0;
@@ -56,7 +56,6 @@
 
 <body>
 
-    <!-- UI Overlay -->
     <div id="ui-layer">
         <div class="flex justify-between items-start">
             <a href="index.html" class="brutalist-btn" style="padding: 0.5rem 1rem; background: #FFFFFF;">&lt; BACK</a>
@@ -92,8 +91,8 @@
     <div id="flash"
         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
-    <!-- Dynamic Scene Injection -->
     <script>
+        // Clean scene injection
         const urlParams = new URLSearchParams(window.location.search);
         const camMode = urlParams.get('cam') === 'environment' ? 'environment' : 'user';
 
@@ -110,7 +109,7 @@
 
     <a-camera active="false" position="0 0 0"></a-camera>
 
-    <!-- Cyber-Bracket AR UI -->
+    <!-- The Cyber-Bracket UI -->
     <a-entity mindar-face-target="anchorIndex: 1">
 
         <!-- Top Left -->
@@ -157,13 +156,13 @@
     </a-scene>
 
     <script>
-        // FLIP CAMERA LOGIC
+        // Repaired Flip Camera Logic
         function flipCamera() {
             const url = new URL(window.location.href);
             const currentCam = url.searchParams.get('cam') || 'user';
             url.searchParams.set('cam', currentCam === 'user' ? 'environment' : 'user');
             url.searchParams.set('v', Date.now());
-            window.location.href = url.toString();
+            window.location.replace(url.toString());
         }
 
         window.onload = () => {
@@ -175,64 +174,44 @@
             }
         };
 
-        // CAPTURE LOGIC
+        // Cleaned Capture Logic using the API that worked in your screenshot
         function captureHUD() {
             const video = document.querySelector('video');
             const sceneEl = document.querySelector('a-scene');
-            const aframeCanvas = document.querySelector('.a-canvas');
 
-            if (!video || !sceneEl || !aframeCanvas) {
-                alert("HUD is calibrating. Please wait a second.");
-                return;
-            }
+            if (!video || !sceneEl) return;
 
             const flash = document.getElementById('flash');
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
-            // Create a canvas exactly the size of the high-res AR screen
+            // Extract the 3D layer natively
+            const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
+            if (!aframeCanvas) return;
+
+            // Match the final canvas to the pure video dimensions
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = aframeCanvas.width;
-            finalCanvas.height = aframeCanvas.height;
+            finalCanvas.width = video.videoWidth;
+            finalCanvas.height = video.videoHeight;
             const ctx = finalCanvas.getContext('2d');
 
-            // Math to scale the video up to match the high-res canvas perfectly without stretching
-            const vRatio = video.videoWidth / video.videoHeight;
-            const cRatio = finalCanvas.width / finalCanvas.height;
-            let sx, sy, sWidth, sHeight;
-
-            if (vRatio > cRatio) {
-                sHeight = video.videoHeight;
-                sWidth = sHeight * cRatio;
-                sx = (video.videoWidth - sWidth) / 2;
-                sy = 0;
-            } else {
-                sWidth = video.videoWidth;
-                sHeight = sWidth / cRatio;
-                sx = 0;
-                sy = (video.videoHeight - sHeight) / 2;
-            }
-
-            // Handle Selfie Mirroring
             const isSelfie = (typeof camMode !== 'undefined' && camMode === 'user');
+
+            // Draw Video (Flipped horizontally if it's a selfie)
             ctx.save();
             if (isSelfie) {
                 ctx.translate(finalCanvas.width, 0);
                 ctx.scale(-1, 1);
             }
-
-            // 1. Draw the properly scaled video
-            ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, finalCanvas.width, finalCanvas.height);
+            ctx.drawImage(video, 0, 0, finalCanvas.width, finalCanvas.height);
             ctx.restore();
 
-            // 2. THE FIX: Force the 3D scene to synchronously render so it isn't blank
-            sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
-
-            // 3. Draw the 3D canvas right on top
+            // Draw the AR elements directly over the video (NOT flipped, so text is readable)
             ctx.drawImage(aframeCanvas, 0, 0, finalCanvas.width, finalCanvas.height);
 
+            // Save File
             const link = document.createElement('a');
-            link.download = 'TapFolio-Clearance-Record.png';
+            link.download = 'TapFolio-FaceTrack.png';
             link.href = finalCanvas.toDataURL('image/png', 1.0);
             link.click();
         }
