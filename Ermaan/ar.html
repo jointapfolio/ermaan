@@ -29,6 +29,34 @@
             overflow: hidden;
         }
 
+        /* FIX: MindAR injects a raw <video> element with its native camera
+           resolution (e.g. 1280x720). Without this, the video renders at
+           its intrinsic aspect ratio inside the full-screen container,
+           leaving black letterbox bars top/bottom. This makes it behave
+           like CSS `object-fit: cover` — fill the screen, crop overflow,
+           no stretching. */
+        #example-container video {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            width: auto !important;
+            height: auto !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            transform: translate(-50%, -50%) !important;
+            object-fit: cover;
+        }
+
+        /* The three.js/A-Frame canvas (the HUD layer) should always match
+           the container exactly so it lines up with the cropped video. */
+        #example-container canvas {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
         #ui-layer {
             position: absolute;
             inset: 0;
@@ -145,24 +173,29 @@
                     material="shader: flat"></a-plane>
             </a-entity>
 
-            <!-- Left Panel -->
-            <a-entity position="-0.55 0 0.1">
-                <a-text value="SYS_SKILLS:\n> INFO SEC\n> CYBER DEFENSE\n> C++ / PYTHON\n> WIRESHARK" color="#FFFFFF"
-                    align="right" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
-                <a-plane width="0.25" height="0.005" color="#FFFFFF" position="0.15 0 0"
-                    material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
-                <a-plane width="0.5" height="0.015" color="#F9CF30" position="-0.25 -0.2 0"
-                    material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
+            <!-- Left Panel: dark plaque behind the text is what actually
+                 makes it readable over skin/hair/background. Bumped the
+                 text `width` up and added `wrap-count` so characters render
+                 bigger instead of a tiny wall of text. -->
+            <a-entity position="-0.62 0.05 0.08">
+                <a-plane width="0.62" height="0.34" color="#000000" position="0 0 -0.01"
+                    material="shader: flat; transparent: true; opacity: 0.55"></a-plane>
+                <a-text value="SYS_SKILLS:\n> INFO SEC\n> CYBER DEF\n> C++ / PYTHON\n> WIRESHARK" color="#FFFFFF"
+                    align="right" width="0.9" wrap-count="16" position="0.28 0.1 0" font="monoid"
+                    material="shader: flat"></a-text>
+                <a-plane width="0.3" height="0.008" color="#F9CF30" position="-0.15 -0.15 0"
+                    material="shader: flat"></a-plane>
             </a-entity>
 
             <!-- Right Panel -->
-            <a-entity position="0.55 0 0.1">
+            <a-entity position="0.62 0.05 0.08">
+                <a-plane width="0.62" height="0.34" color="#000000" position="0 0 -0.01"
+                    material="shader: flat; transparent: true; opacity: 0.55"></a-plane>
                 <a-text value="ID: ERMAAN SINGH\nSTATUS: 4.0 GPA\nROLE: IT STUDENT\nCLEARANCE: INTERN" color="#F9CF30"
-                    align="left" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
-                <a-plane width="0.25" height="0.005" color="#FFFFFF" position="-0.15 0 0"
-                    material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
-                <a-plane width="0.5" height="0.015" color="#FFFFFF" position="0.25 -0.2 0"
-                    material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
+                    align="left" width="0.9" wrap-count="16" position="-0.28 0.1 0" font="monoid"
+                    material="shader: flat"></a-text>
+                <a-plane width="0.3" height="0.008" color="#FFFFFF" position="0.15 -0.15 0"
+                    material="shader: flat"></a-plane>
             </a-entity>
 
         </a-entity>
@@ -188,42 +221,70 @@
         };
 
         function captureHUD() {
-            const video = document.querySelector('video');
+            const video = document.querySelector('#example-container video');
             const sceneEl = document.querySelector('a-scene');
 
-            if (!video || !sceneEl) return;
+            if (!video || !sceneEl || !sceneEl.components.screenshot) return;
 
             const flash = document.getElementById('flash');
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
-            // Extract the 3D layer natively
+            // Force synchronous render first, so the HUD frame we grab
+            // below is fresh (not a stale/blank buffer).
+            sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
             const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
             if (!aframeCanvas) return;
 
-            // Because the layout is now correct, we can use the canvas dimensions directly
+            // FIX: output at the size the user actually SEES on screen
+            // (the container), not the video's native camera resolution.
+            // This is what the aframe canvas is already sized to, so the
+            // two layers line up 1:1.
+            const rect = document.getElementById('example-container').getBoundingClientRect();
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = aframeCanvas.width;
-            finalCanvas.height = aframeCanvas.height;
+            finalCanvas.width = Math.round(rect.width * dpr);
+            finalCanvas.height = Math.round(rect.height * dpr);
             const ctx = finalCanvas.getContext('2d');
 
             const isSelfie = (typeof camMode !== 'undefined' && camMode === 'user');
 
-            // Draw Video (Flipped horizontally if it's a selfie)
+            // FIX: replicate the CSS `object-fit: cover` crop math manually
+            // when drawing the video into the canvas, instead of stretching
+            // the raw video to fill a differently-proportioned canvas.
+            const vw = video.videoWidth || 1280;
+            const vh = video.videoHeight || 720;
+            const cw = finalCanvas.width;
+            const ch = finalCanvas.height;
+            const videoRatio = vw / vh;
+            const canvasRatio = cw / ch;
+
+            let sx, sy, sw, sh;
+            if (videoRatio > canvasRatio) {
+                // Video is relatively wider than the screen -> crop left/right
+                sh = vh;
+                sw = vh * canvasRatio;
+                sx = (vw - sw) / 2;
+                sy = 0;
+            } else {
+                // Video is relatively taller than the screen -> crop top/bottom
+                sw = vw;
+                sh = vw / canvasRatio;
+                sx = 0;
+                sy = (vh - sh) / 2;
+            }
+
             ctx.save();
             if (isSelfie) {
-                ctx.translate(finalCanvas.width, 0);
+                ctx.translate(cw, 0);
                 ctx.scale(-1, 1);
             }
-            // Draw the video filling the canvas
-            ctx.drawImage(video, 0, 0, finalCanvas.width, finalCanvas.height);
+            ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
             ctx.restore();
 
-            // Force synchronous render to ensure HUD isn't blank
-            sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
-
-            // Draw the AR elements directly over the video
-            ctx.drawImage(aframeCanvas, 0, 0, finalCanvas.width, finalCanvas.height);
+            // Draw the AR HUD layer on top — already matches the container's
+            // aspect ratio, so no distortion here.
+            ctx.drawImage(aframeCanvas, 0, 0, cw, ch);
 
             // Save File
             const link = document.createElement('a');
