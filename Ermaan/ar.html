@@ -11,10 +11,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* 
-      Sets a stark black background to create a cinematic letterbox. 
-      Prevents the camera from looking "broken" while maintaining perfect AR math.
-    */
         body,
         html {
             margin: 0;
@@ -25,10 +21,17 @@
             background-color: #111111;
         }
 
-        /* Forces the video and AR canvas to sit ABOVE the black background */
+        /* Forces both elements to stretch and fill the screen flawlessly without breaking matrix math */
         video,
         canvas {
-            z-index: 1 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: cover !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: none !important;
+            margin: 0 !important;
         }
 
         #ui-layer {
@@ -117,10 +120,9 @@
 
     <a-camera active="false" position="0 0 0"></a-camera>
 
-    <!-- Face Anchor -->
+    <!-- Face Anchor with the Cyber-Bracket UI -->
     <a-entity mindar-face-target="anchorIndex: 1">
 
-        <!-- NEW DESIGN: The Cyber-Bracket (Replaces Rings) -->
         <!-- Top Left Corner -->
         <a-entity position="-0.3 0.35 0">
             <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0" material="shader: flat"></a-plane>
@@ -149,7 +151,6 @@
         <a-entity position="-0.55 0 0.1">
             <a-text value="SYS_SKILLS:\n> INFO SEC\n> CYBER DEFENSE\n> C++ / PYTHON\n> WIRESHARK" color="#FFFFFF"
                 align="right" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
-            <!-- Thin connecting line pointing to the face bracket -->
             <a-plane width="0.25" height="0.005" color="#FFFFFF" position="0.15 0 0"
                 material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
             <a-plane width="0.5" height="0.015" color="#F9CF30" position="-0.25 -0.2 0"
@@ -160,7 +161,6 @@
         <a-entity position="0.55 0 0.1">
             <a-text value="ID: ERMAAN SINGH\nSTATUS: 4.0 GPA\nROLE: IT STUDENT\nCLEARANCE: INTERN" color="#F9CF30"
                 align="left" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
-            <!-- Thin connecting line pointing to the face bracket -->
             <a-plane width="0.25" height="0.005" color="#FFFFFF" position="-0.15 0 0"
                 material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
             <a-plane width="0.5" height="0.015" color="#FFFFFF" position="0.25 -0.2 0"
@@ -174,7 +174,6 @@
         function flipCamera() {
             const currentUrl = new URL(window.location.href);
             const currentCam = currentUrl.searchParams.get('cam');
-
             if (currentCam === 'environment') {
                 currentUrl.searchParams.set('cam', 'user');
             } else {
@@ -205,32 +204,51 @@
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
-            // EXPLOIT: Use A-Frame's native screenshot API to force the WebGL buffer
-            const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
+            // Grab the high-res 3D layer
+            const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective') || document.querySelector('.a-canvas');
 
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = video.videoWidth;
-            tempCanvas.height = video.videoHeight;
-            const ctx = tempCanvas.getContext('2d');
+            const canvas = document.createElement('canvas');
+            canvas.width = aframeCanvas.width;
+            canvas.height = aframeCanvas.height;
+            const ctx = canvas.getContext('2d');
+
+            // Calculate perfect scale/crop so the low-res video matches the high-res AR layer
+            const vRatio = video.videoWidth / video.videoHeight;
+            const cRatio = canvas.width / canvas.height;
+            let sx, sy, sWidth, sHeight;
+
+            if (vRatio > cRatio) {
+                sHeight = video.videoHeight;
+                sWidth = sHeight * cRatio;
+                sx = (video.videoWidth - sWidth) / 2;
+                sy = 0;
+            } else {
+                sWidth = video.videoWidth;
+                sHeight = sWidth / cRatio;
+                sx = 0;
+                sy = (video.videoHeight - sHeight) / 2;
+            }
 
             const isSelfie = (typeof camMode !== 'undefined' && camMode === 'user');
 
+            // Save context, flip ONLY the video so text stays readable, draw video, restore context
+            ctx.save();
             if (isSelfie) {
-                ctx.translate(tempCanvas.width, 0);
+                ctx.translate(canvas.width, 0);
                 ctx.scale(-1, 1);
             }
+            ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
 
-            // Draw Video Feed
-            ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-
-            // Draw the natively captured A-Frame layer over it
+            // Draw the AR Canvas completely normal over the video
             if (aframeCanvas) {
-                ctx.drawImage(aframeCanvas, 0, 0, tempCanvas.width, tempCanvas.height);
+                ctx.drawImage(aframeCanvas, 0, 0, canvas.width, canvas.height);
             }
 
+            // Download
             const link = document.createElement('a');
             link.download = 'TapFolio-Clearance-Record.png';
-            link.href = tempCanvas.toDataURL('image/png', 1.0);
+            link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
         }
     </script>
