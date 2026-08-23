@@ -11,7 +11,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* REVERTED: Back to the exact code that worked perfectly. No custom video stretching. */
         body,
         html {
             margin: 0;
@@ -19,7 +18,15 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: transparent;
+            background-color: #111111;
+        }
+
+        /* MANDATORY MINDAR STRUCTURE: The container that holds the scene */
+        #example-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
         }
 
         #ui-layer {
@@ -91,72 +98,78 @@
     <div id="flash"
         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
+    <!-- MANDATORY MINDAR STRUCTURE: The wrapper div -->
+    <div id="example-container">
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const camMode = urlParams.get('cam') === 'environment' ? 'environment' : 'user';
+
+            document.write(`
+        <a-scene 
+          mindar-face="facingMode: ${camMode};" 
+          embedded 
+          color-space="sRGB" 
+          renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" 
+          vr-mode-ui="enabled: false" 
+          device-orientation-permission-ui="enabled: false">
+      `);
+        </script>
+
+        <a-camera active="false" position="0 0 0"></a-camera>
+
+        <a-entity mindar-face-target="anchorIndex: 1">
+
+            <!-- Cyber-Bracket -->
+            <a-entity position="-0.3 0.35 0">
+                <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0"
+                    material="shader: flat"></a-plane>
+            </a-entity>
+            <a-entity position="0.3 0.35 0">
+                <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0"
+                    material="shader: flat"></a-plane>
+            </a-entity>
+            <a-entity position="-0.3 -0.35 0">
+                <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0"
+                    material="shader: flat"></a-plane>
+            </a-entity>
+            <a-entity position="0.3 -0.35 0">
+                <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0"
+                    material="shader: flat"></a-plane>
+            </a-entity>
+
+            <!-- Left Panel -->
+            <a-entity position="-0.55 0 0.1">
+                <a-text value="SYS_SKILLS:\n> INFO SEC\n> CYBER DEFENSE\n> C++ / PYTHON\n> WIRESHARK" color="#FFFFFF"
+                    align="right" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
+                <a-plane width="0.25" height="0.005" color="#FFFFFF" position="0.15 0 0"
+                    material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
+                <a-plane width="0.5" height="0.015" color="#F9CF30" position="-0.25 -0.2 0"
+                    material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
+            </a-entity>
+
+            <!-- Right Panel -->
+            <a-entity position="0.55 0 0.1">
+                <a-text value="ID: ERMAAN SINGH\nSTATUS: 4.0 GPA\nROLE: IT STUDENT\nCLEARANCE: INTERN" color="#F9CF30"
+                    align="left" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
+                <a-plane width="0.25" height="0.005" color="#FFFFFF" position="-0.15 0 0"
+                    material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
+                <a-plane width="0.5" height="0.015" color="#FFFFFF" position="0.25 -0.2 0"
+                    material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
+            </a-entity>
+
+        </a-entity>
+        </a-scene>
+    </div> <!-- End wrapper div -->
+
     <script>
-        // Clean scene injection
-        const urlParams = new URLSearchParams(window.location.search);
-        const camMode = urlParams.get('cam') === 'environment' ? 'environment' : 'user';
-
-        document.write(`
-      <a-scene 
-        mindar-face="facingMode: ${camMode};" 
-        embedded 
-        color-space="sRGB" 
-        renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false">
-    `);
-    </script>
-
-    <a-camera active="false" position="0 0 0"></a-camera>
-
-    <!-- The Cyber-Bracket UI -->
-    <a-entity mindar-face-target="anchorIndex: 1">
-
-        <!-- Top Left -->
-        <a-entity position="-0.3 0.35 0">
-            <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0" material="shader: flat"></a-plane>
-            <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0" material="shader: flat"></a-plane>
-        </a-entity>
-        <!-- Top Right -->
-        <a-entity position="0.3 0.35 0">
-            <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0" material="shader: flat"></a-plane>
-            <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0" material="shader: flat"></a-plane>
-        </a-entity>
-        <!-- Bottom Left -->
-        <a-entity position="-0.3 -0.35 0">
-            <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0" material="shader: flat"></a-plane>
-            <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0" material="shader: flat"></a-plane>
-        </a-entity>
-        <!-- Bottom Right -->
-        <a-entity position="0.3 -0.35 0">
-            <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0" material="shader: flat"></a-plane>
-            <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0" material="shader: flat"></a-plane>
-        </a-entity>
-
-        <!-- Left Panel -->
-        <a-entity position="-0.55 0 0.1">
-            <a-text value="SYS_SKILLS:\n> INFO SEC\n> CYBER DEFENSE\n> C++ / PYTHON\n> WIRESHARK" color="#FFFFFF"
-                align="right" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
-            <a-plane width="0.25" height="0.005" color="#FFFFFF" position="0.15 0 0"
-                material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
-            <a-plane width="0.5" height="0.015" color="#F9CF30" position="-0.25 -0.2 0"
-                material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
-        </a-entity>
-        <!-- Right Panel -->
-        <a-entity position="0.55 0 0.1">
-            <a-text value="ID: ERMAAN SINGH\nSTATUS: 4.0 GPA\nROLE: IT STUDENT\nCLEARANCE: INTERN" color="#F9CF30"
-                align="left" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
-            <a-plane width="0.25" height="0.005" color="#FFFFFF" position="-0.15 0 0"
-                material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
-            <a-plane width="0.5" height="0.015" color="#FFFFFF" position="0.25 -0.2 0"
-                material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
-        </a-entity>
-
-    </a-entity>
-    </a-scene>
-
-    <script>
-        // Repaired Flip Camera Logic
         function flipCamera() {
             const url = new URL(window.location.href);
             const currentCam = url.searchParams.get('cam') || 'user';
@@ -174,7 +187,6 @@
             }
         };
 
-        // Cleaned Capture Logic using the API that worked in your screenshot
         function captureHUD() {
             const video = document.querySelector('video');
             const sceneEl = document.querySelector('a-scene');
@@ -189,10 +201,10 @@
             const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
             if (!aframeCanvas) return;
 
-            // Match the final canvas to the pure video dimensions
+            // Because the layout is now correct, we can use the canvas dimensions directly
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = video.videoWidth;
-            finalCanvas.height = video.videoHeight;
+            finalCanvas.width = aframeCanvas.width;
+            finalCanvas.height = aframeCanvas.height;
             const ctx = finalCanvas.getContext('2d');
 
             const isSelfie = (typeof camMode !== 'undefined' && camMode === 'user');
@@ -203,15 +215,19 @@
                 ctx.translate(finalCanvas.width, 0);
                 ctx.scale(-1, 1);
             }
+            // Draw the video filling the canvas
             ctx.drawImage(video, 0, 0, finalCanvas.width, finalCanvas.height);
             ctx.restore();
 
-            // Draw the AR elements directly over the video (NOT flipped, so text is readable)
+            // Force synchronous render to ensure HUD isn't blank
+            sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
+
+            // Draw the AR elements directly over the video
             ctx.drawImage(aframeCanvas, 0, 0, finalCanvas.width, finalCanvas.height);
 
             // Save File
             const link = document.createElement('a');
-            link.download = 'TapFolio-FaceTrack.png';
+            link.download = 'TapFolio-Clearance-Record.png';
             link.href = finalCanvas.toDataURL('image/png', 1.0);
             link.click();
         }
