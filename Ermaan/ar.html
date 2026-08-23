@@ -11,7 +11,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* Transparent background and natural scaling for perfect matrix math */
+        /* 
+      Sets a stark black background to create a cinematic letterbox. 
+      Prevents the camera from looking "broken" while maintaining perfect AR math.
+    */
         body,
         html {
             margin: 0;
@@ -19,7 +22,13 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: transparent;
+            background-color: #111111;
+        }
+
+        /* Forces the video and AR canvas to sit ABOVE the black background */
+        video,
+        canvas {
+            z-index: 1 !important;
         }
 
         #ui-layer {
@@ -56,7 +65,6 @@
 
 <body>
 
-    <!-- UI Overlay -->
     <div id="ui-layer">
         <div class="flex justify-between items-start">
             <a href="index.html" class="brutalist-btn" style="padding: 0.5rem 1rem; background: #FFFFFF;">&lt; BACK</a>
@@ -92,7 +100,6 @@
     <div id="flash"
         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
-    <!-- Scene Setup with CORRECTED Semicolons for preserveDrawingBuffer -->
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const camMode = urlParams.get('cam') === 'environment' ? 'environment' : 'user';
@@ -102,7 +109,7 @@
         mindar-face="facingMode: ${camMode};" 
         embedded 
         color-space="sRGB" 
-        renderer="colorManagement: true; physicallyCorrectLights: true; preserveDrawingBuffer: true; alpha: true;" 
+        renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false">
     `);
@@ -113,36 +120,49 @@
     <!-- Face Anchor -->
     <a-entity mindar-face-target="anchorIndex: 1">
 
-        <!-- Outer Ring (Scaled for mobile) -->
-        <a-ring radius-inner="0.50" radius-outer="0.52" color="#F9CF30"
-            material="shader: flat; transparent: true; opacity: 0.8"
-            animation="property: rotation; to: 0 0 360; dur: 10000; loop: true; easing: linear"></a-ring>
+        <!-- NEW DESIGN: The Cyber-Bracket (Replaces Rings) -->
+        <!-- Top Left Corner -->
+        <a-entity position="-0.3 0.35 0">
+            <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0" material="shader: flat"></a-plane>
+            <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0" material="shader: flat"></a-plane>
+        </a-entity>
 
-        <!-- Inner Ring (Scaled for mobile) -->
-        <a-ring radius-inner="0.40" radius-outer="0.45" color="#FFFFFF"
-            material="shader: flat; transparent: true; opacity: 0.4" theta-length="280"
-            animation="property: rotation; to: 0 0 -360; dur: 6000; loop: true; easing: linear"></a-ring>
+        <!-- Top Right Corner -->
+        <a-entity position="0.3 0.35 0">
+            <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0" material="shader: flat"></a-plane>
+            <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0" material="shader: flat"></a-plane>
+        </a-entity>
 
-        <!-- Center Crosshairs -->
-        <a-entity position="0 0 0">
-            <a-plane width="0.03" height="0.008" color="#F9CF30" position="-0.08 0 0" material="shader: flat"></a-plane>
-            <a-plane width="0.03" height="0.008" color="#F9CF30" position="0.08 0 0" material="shader: flat"></a-plane>
-            <a-plane width="0.008" height="0.03" color="#F9CF30" position="0 -0.08 0" material="shader: flat"></a-plane>
-            <a-plane width="0.008" height="0.03" color="#F9CF30" position="0 0.08 0" material="shader: flat"></a-plane>
+        <!-- Bottom Left Corner -->
+        <a-entity position="-0.3 -0.35 0">
+            <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0" material="shader: flat"></a-plane>
+            <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0" material="shader: flat"></a-plane>
+        </a-entity>
+
+        <!-- Bottom Right Corner -->
+        <a-entity position="0.3 -0.35 0">
+            <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0" material="shader: flat"></a-plane>
+            <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0" material="shader: flat"></a-plane>
         </a-entity>
 
         <!-- Left Panel: Skills -->
         <a-entity position="-0.55 0 0.1">
             <a-text value="SYS_SKILLS:\n> INFO SEC\n> CYBER DEFENSE\n> C++ / PYTHON\n> WIRESHARK" color="#FFFFFF"
                 align="right" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
+            <!-- Thin connecting line pointing to the face bracket -->
+            <a-plane width="0.25" height="0.005" color="#FFFFFF" position="0.15 0 0"
+                material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
             <a-plane width="0.5" height="0.015" color="#F9CF30" position="-0.25 -0.2 0"
                 material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
         </a-entity>
 
-        <!-- Right Panel: Clearance -->
+        <!-- Right Panel: Stats -->
         <a-entity position="0.55 0 0.1">
             <a-text value="ID: ERMAAN SINGH\nSTATUS: 4.0 GPA\nROLE: IT STUDENT\nCLEARANCE: INTERN" color="#F9CF30"
                 align="left" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
+            <!-- Thin connecting line pointing to the face bracket -->
+            <a-plane width="0.25" height="0.005" color="#FFFFFF" position="-0.15 0 0"
+                material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
             <a-plane width="0.5" height="0.015" color="#FFFFFF" position="0.25 -0.2 0"
                 material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
         </a-entity>
@@ -151,7 +171,6 @@
     </a-scene>
 
     <script>
-        // 1. Flip Camera Functionality
         function flipCamera() {
             const currentUrl = new URL(window.location.href);
             const currentCam = currentUrl.searchParams.get('cam');
@@ -164,7 +183,6 @@
             window.location.href = currentUrl.toString();
         }
 
-        // 2. Dynamic Text Instruction
         window.onload = () => {
             const camInstruction = document.getElementById('cam-instruction');
             if (typeof camMode !== 'undefined' && camMode === 'user') {
@@ -174,13 +192,12 @@
             }
         };
 
-        // 3. Perfect Capture Logic (Merges Video + 3D Holograms)
         function captureHUD() {
             const video = document.querySelector('video');
-            const aframeCanvas = document.querySelector('canvas.a-canvas');
+            const sceneEl = document.querySelector('a-scene');
 
-            if (!video || !aframeCanvas) {
-                alert("HUD is still calibrating. Please wait a second.");
+            if (!video || !sceneEl) {
+                alert("HUD calibrating. Wait a second.");
                 return;
             }
 
@@ -188,25 +205,32 @@
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
+            // EXPLOIT: Use A-Frame's native screenshot API to force the WebGL buffer
+            const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
+
             const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = video.videoWidth || window.innerWidth;
-            tempCanvas.height = video.videoHeight || window.innerHeight;
+            tempCanvas.width = video.videoWidth;
+            tempCanvas.height = video.videoHeight;
             const ctx = tempCanvas.getContext('2d');
 
             const isSelfie = (typeof camMode !== 'undefined' && camMode === 'user');
 
             if (isSelfie) {
-                // Mirrors the final image so text is readable in selfies
                 ctx.translate(tempCanvas.width, 0);
                 ctx.scale(-1, 1);
             }
 
+            // Draw Video Feed
             ctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
-            ctx.drawImage(aframeCanvas, 0, 0, tempCanvas.width, tempCanvas.height);
+
+            // Draw the natively captured A-Frame layer over it
+            if (aframeCanvas) {
+                ctx.drawImage(aframeCanvas, 0, 0, tempCanvas.width, tempCanvas.height);
+            }
 
             const link = document.createElement('a');
             link.download = 'TapFolio-Clearance-Record.png';
-            link.href = tempCanvas.toDataURL('image/png');
+            link.href = tempCanvas.toDataURL('image/png', 1.0);
             link.click();
         }
     </script>
