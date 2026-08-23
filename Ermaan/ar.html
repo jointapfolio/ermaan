@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
+        /* Stripped all aggressive video CSS. Letting MindAR handle the mobile view natively. */
         body,
         html {
             margin: 0;
@@ -18,20 +19,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #111111;
-        }
-
-        /* Forces both elements to stretch and fill the screen flawlessly without breaking matrix math */
-        video,
-        canvas {
-            width: 100vw !important;
-            height: 100vh !important;
-            object-fit: cover !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            transform: none !important;
-            margin: 0 !important;
+            background-color: #000;
         }
 
         #ui-layer {
@@ -73,6 +61,7 @@
             <a href="index.html" class="brutalist-btn" style="padding: 0.5rem 1rem; background: #FFFFFF;">&lt; BACK</a>
 
             <div class="flex gap-2">
+                <!-- Flip Camera Button -->
                 <button onclick="flipCamera()" class="brutalist-btn" style="padding: 0.5rem; background: #FFFFFF;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -103,6 +92,7 @@
     <div id="flash"
         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
+    <!-- Dynamic Scene Injection for Camera Facing -->
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const camMode = urlParams.get('cam') === 'environment' ? 'environment' : 'user';
@@ -120,34 +110,34 @@
 
     <a-camera active="false" position="0 0 0"></a-camera>
 
-    <!-- Face Anchor with the Cyber-Bracket UI -->
+    <!-- The Cyber-Bracket UI -->
     <a-entity mindar-face-target="anchorIndex: 1">
 
-        <!-- Top Left Corner -->
+        <!-- Top Left -->
         <a-entity position="-0.3 0.35 0">
             <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0" material="shader: flat"></a-plane>
             <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0" material="shader: flat"></a-plane>
         </a-entity>
 
-        <!-- Top Right Corner -->
+        <!-- Top Right -->
         <a-entity position="0.3 0.35 0">
             <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0" material="shader: flat"></a-plane>
             <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0" material="shader: flat"></a-plane>
         </a-entity>
 
-        <!-- Bottom Left Corner -->
+        <!-- Bottom Left -->
         <a-entity position="-0.3 -0.35 0">
             <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0" material="shader: flat"></a-plane>
             <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0" material="shader: flat"></a-plane>
         </a-entity>
 
-        <!-- Bottom Right Corner -->
+        <!-- Bottom Right -->
         <a-entity position="0.3 -0.35 0">
             <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0" material="shader: flat"></a-plane>
             <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0" material="shader: flat"></a-plane>
         </a-entity>
 
-        <!-- Left Panel: Skills -->
+        <!-- Left Panel -->
         <a-entity position="-0.55 0 0.1">
             <a-text value="SYS_SKILLS:\n> INFO SEC\n> CYBER DEFENSE\n> C++ / PYTHON\n> WIRESHARK" color="#FFFFFF"
                 align="right" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
@@ -157,7 +147,7 @@
                 material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
         </a-entity>
 
-        <!-- Right Panel: Stats -->
+        <!-- Right Panel -->
         <a-entity position="0.55 0 0.1">
             <a-text value="ID: ERMAAN SINGH\nSTATUS: 4.0 GPA\nROLE: IT STUDENT\nCLEARANCE: INTERN" color="#F9CF30"
                 align="left" width="1.4" position="0 0.15 0" font="monoid" material="shader: flat"></a-text>
@@ -171,15 +161,18 @@
     </a-scene>
 
     <script>
+        // Robust Camera Flip
         function flipCamera() {
-            const currentUrl = new URL(window.location.href);
-            const currentCam = currentUrl.searchParams.get('cam');
-            if (currentCam === 'environment') {
-                currentUrl.searchParams.set('cam', 'user');
-            } else {
-                currentUrl.searchParams.set('cam', 'environment');
-            }
-            window.location.href = currentUrl.toString();
+            const url = new URL(window.location.href);
+            const currentCam = url.searchParams.get('cam') || 'user';
+
+            // Swap the camera value
+            url.searchParams.set('cam', currentCam === 'user' ? 'environment' : 'user');
+
+            // Force a fresh reload by updating the cache buster
+            url.searchParams.set('v', Date.now());
+
+            window.location.href = url.toString();
         }
 
         window.onload = () => {
@@ -191,64 +184,37 @@
             }
         };
 
+        // Clean, direct capture logic. No complex scaling.
         function captureHUD() {
             const video = document.querySelector('video');
-            const sceneEl = document.querySelector('a-scene');
+            const aframeCanvas = document.querySelector('.a-canvas');
 
-            if (!video || !sceneEl) {
+            if (!video || !aframeCanvas) {
                 alert("HUD calibrating. Wait a second.");
                 return;
             }
 
+            // Flash Effect
             const flash = document.getElementById('flash');
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
-            // Grab the high-res 3D layer
-            const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective') || document.querySelector('.a-canvas');
+            // Create a canvas exactly the size of the raw video stream
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = video.videoWidth;
+            finalCanvas.height = video.videoHeight;
+            const ctx = finalCanvas.getContext('2d');
 
-            const canvas = document.createElement('canvas');
-            canvas.width = aframeCanvas.width;
-            canvas.height = aframeCanvas.height;
-            const ctx = canvas.getContext('2d');
+            // 1. Draw the raw video
+            ctx.drawImage(video, 0, 0, finalCanvas.width, finalCanvas.height);
 
-            // Calculate perfect scale/crop so the low-res video matches the high-res AR layer
-            const vRatio = video.videoWidth / video.videoHeight;
-            const cRatio = canvas.width / canvas.height;
-            let sx, sy, sWidth, sHeight;
+            // 2. Draw the 3D graphics directly on top
+            ctx.drawImage(aframeCanvas, 0, 0, finalCanvas.width, finalCanvas.height);
 
-            if (vRatio > cRatio) {
-                sHeight = video.videoHeight;
-                sWidth = sHeight * cRatio;
-                sx = (video.videoWidth - sWidth) / 2;
-                sy = 0;
-            } else {
-                sWidth = video.videoWidth;
-                sHeight = sWidth / cRatio;
-                sx = 0;
-                sy = (video.videoHeight - sHeight) / 2;
-            }
-
-            const isSelfie = (typeof camMode !== 'undefined' && camMode === 'user');
-
-            // Save context, flip ONLY the video so text stays readable, draw video, restore context
-            ctx.save();
-            if (isSelfie) {
-                ctx.translate(canvas.width, 0);
-                ctx.scale(-1, 1);
-            }
-            ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
-            ctx.restore();
-
-            // Draw the AR Canvas completely normal over the video
-            if (aframeCanvas) {
-                ctx.drawImage(aframeCanvas, 0, 0, canvas.width, canvas.height);
-            }
-
-            // Download
+            // Save the image
             const link = document.createElement('a');
             link.download = 'TapFolio-Clearance-Record.png';
-            link.href = canvas.toDataURL('image/png', 1.0);
+            link.href = finalCanvas.toDataURL('image/png', 1.0);
             link.click();
         }
     </script>
