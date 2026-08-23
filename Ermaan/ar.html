@@ -11,7 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* Stripped all aggressive video CSS. Letting MindAR handle the mobile view natively. */
+        /* TRIPLE CHECKED: Background is entirely transparent. No CSS stretching hacks. */
         body,
         html {
             margin: 0;
@@ -19,7 +19,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #000;
+            background-color: transparent;
         }
 
         #ui-layer {
@@ -56,12 +56,12 @@
 
 <body>
 
+    <!-- UI Overlay -->
     <div id="ui-layer">
         <div class="flex justify-between items-start">
             <a href="index.html" class="brutalist-btn" style="padding: 0.5rem 1rem; background: #FFFFFF;">&lt; BACK</a>
 
             <div class="flex gap-2">
-                <!-- Flip Camera Button -->
                 <button onclick="flipCamera()" class="brutalist-btn" style="padding: 0.5rem; background: #FFFFFF;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -92,7 +92,7 @@
     <div id="flash"
         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
-    <!-- Dynamic Scene Injection for Camera Facing -->
+    <!-- Dynamic Scene Injection -->
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const camMode = urlParams.get('cam') === 'environment' ? 'environment' : 'user';
@@ -110,7 +110,7 @@
 
     <a-camera active="false" position="0 0 0"></a-camera>
 
-    <!-- The Cyber-Bracket UI -->
+    <!-- Cyber-Bracket AR UI -->
     <a-entity mindar-face-target="anchorIndex: 1">
 
         <!-- Top Left -->
@@ -118,19 +118,16 @@
             <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0" material="shader: flat"></a-plane>
             <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0" material="shader: flat"></a-plane>
         </a-entity>
-
         <!-- Top Right -->
         <a-entity position="0.3 0.35 0">
             <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0" material="shader: flat"></a-plane>
             <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0" material="shader: flat"></a-plane>
         </a-entity>
-
         <!-- Bottom Left -->
         <a-entity position="-0.3 -0.35 0">
             <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0" material="shader: flat"></a-plane>
             <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0" material="shader: flat"></a-plane>
         </a-entity>
-
         <!-- Bottom Right -->
         <a-entity position="0.3 -0.35 0">
             <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0" material="shader: flat"></a-plane>
@@ -146,7 +143,6 @@
             <a-plane width="0.5" height="0.015" color="#F9CF30" position="-0.25 -0.2 0"
                 material="shader: flat; transparent: true; opacity: 0.8"></a-plane>
         </a-entity>
-
         <!-- Right Panel -->
         <a-entity position="0.55 0 0.1">
             <a-text value="ID: ERMAAN SINGH\nSTATUS: 4.0 GPA\nROLE: IT STUDENT\nCLEARANCE: INTERN" color="#F9CF30"
@@ -161,17 +157,12 @@
     </a-scene>
 
     <script>
-        // Robust Camera Flip
+        // FLIP CAMERA LOGIC
         function flipCamera() {
             const url = new URL(window.location.href);
             const currentCam = url.searchParams.get('cam') || 'user';
-
-            // Swap the camera value
             url.searchParams.set('cam', currentCam === 'user' ? 'environment' : 'user');
-
-            // Force a fresh reload by updating the cache buster
             url.searchParams.set('v', Date.now());
-
             window.location.href = url.toString();
         }
 
@@ -184,34 +175,62 @@
             }
         };
 
-        // Clean, direct capture logic. No complex scaling.
+        // CAPTURE LOGIC
         function captureHUD() {
             const video = document.querySelector('video');
+            const sceneEl = document.querySelector('a-scene');
             const aframeCanvas = document.querySelector('.a-canvas');
 
-            if (!video || !aframeCanvas) {
-                alert("HUD calibrating. Wait a second.");
+            if (!video || !sceneEl || !aframeCanvas) {
+                alert("HUD is calibrating. Please wait a second.");
                 return;
             }
 
-            // Flash Effect
             const flash = document.getElementById('flash');
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
-            // Create a canvas exactly the size of the raw video stream
+            // Create a canvas exactly the size of the high-res AR screen
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = video.videoWidth;
-            finalCanvas.height = video.videoHeight;
+            finalCanvas.width = aframeCanvas.width;
+            finalCanvas.height = aframeCanvas.height;
             const ctx = finalCanvas.getContext('2d');
 
-            // 1. Draw the raw video
-            ctx.drawImage(video, 0, 0, finalCanvas.width, finalCanvas.height);
+            // Math to scale the video up to match the high-res canvas perfectly without stretching
+            const vRatio = video.videoWidth / video.videoHeight;
+            const cRatio = finalCanvas.width / finalCanvas.height;
+            let sx, sy, sWidth, sHeight;
 
-            // 2. Draw the 3D graphics directly on top
+            if (vRatio > cRatio) {
+                sHeight = video.videoHeight;
+                sWidth = sHeight * cRatio;
+                sx = (video.videoWidth - sWidth) / 2;
+                sy = 0;
+            } else {
+                sWidth = video.videoWidth;
+                sHeight = sWidth / cRatio;
+                sx = 0;
+                sy = (video.videoHeight - sHeight) / 2;
+            }
+
+            // Handle Selfie Mirroring
+            const isSelfie = (typeof camMode !== 'undefined' && camMode === 'user');
+            ctx.save();
+            if (isSelfie) {
+                ctx.translate(finalCanvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+
+            // 1. Draw the properly scaled video
+            ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, finalCanvas.width, finalCanvas.height);
+            ctx.restore();
+
+            // 2. THE FIX: Force the 3D scene to synchronously render so it isn't blank
+            sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
+
+            // 3. Draw the 3D canvas right on top
             ctx.drawImage(aframeCanvas, 0, 0, finalCanvas.width, finalCanvas.height);
 
-            // Save the image
             const link = document.createElement('a');
             link.download = 'TapFolio-Clearance-Record.png';
             link.href = finalCanvas.toDataURL('image/png', 1.0);
