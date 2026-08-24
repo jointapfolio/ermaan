@@ -18,29 +18,19 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: transparent;
+            background-color: #111111;
         }
 
+        /* 
+           THE FIX: Let MindAR handle all internal scaling and mirroring. 
+           We removed ALL custom CSS targeting the video and canvas so the 
+           aspect ratio stays perfect and the AI tracking doesn't break.
+        */
         #example-container {
             width: 100vw;
             height: 100vh;
             position: relative;
             overflow: hidden;
-        }
-
-        /* 
-           THE FIX: We use object-fit: cover to flawlessly center and crop the video 
-           to any mobile screen size. We REMOVED the 'transform' override so MindAR 
-           can natively mirror the video and tracking matrix in perfect sync.
-        */
-        #example-container video,
-        #example-container canvas {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            object-fit: cover !important;
         }
 
         #ui-layer {
@@ -93,8 +83,7 @@
             <button onclick="captureHUD()" class="brutalist-btn w-full max-w-sm mx-auto">
                 [ CAPTURE HUD RECORD ]
             </button>
-            <p class="text-[#F9CF30] font-mono text-xs mt-3 font-bold bg-black/50 inline-block px-2"
-                id="cam-instruction">
+            <p class="text-[#F9CF30] font-mono text-xs mt-3 font-bold bg-black/50 inline-block px-2">
                 SELFIE MODE ALIGNED
             </p>
         </div>
@@ -104,91 +93,82 @@
         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
     <div id="example-container">
-        <script>
-            // Using default mindar-face ensures the 3D space and video mirror are locked together natively.
-            document.write(
-                '<a-scene mindar-face embedded color-space="sRGB" ' +
-                'renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" ' +
-                'vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">'
-            );
-        </script>
+        <!-- Native selfie mode. MindAR will mirror both video and tracking automatically -->
+        <a-scene mindar-face embedded color-space="sRGB"
+            renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" vr-mode-ui="enabled: false"
+            device-orientation-permission-ui="enabled: false">
 
-        <a-camera active="false" position="0 0 0"></a-camera>
+            <a-camera active="false" position="0 0 0"></a-camera>
 
-        <a-entity mindar-face-target="anchorIndex: 168">
+            <!-- Anchor 168 is the bridge of the nose, providing the most stable tracking -->
+            <a-entity mindar-face-target="anchorIndex: 168">
 
-            <!-- CORNER BRACKETS -->
-            <a-entity position="-0.32 0.28 0">
-                <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
-                    material="shader: flat"></a-plane>
-                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
-                    material="shader: flat"></a-plane>
+                <!-- CORNER BRACKETS -->
+                <a-entity position="-0.32 0.28 0">
+                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
+                        material="shader: flat"></a-plane>
+                </a-entity>
+                <a-entity position="0.32 0.28 0">
+                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
+                        material="shader: flat"></a-plane>
+                </a-entity>
+                <a-entity position="-0.32 -0.28 0">
+                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0"
+                        material="shader: flat"></a-plane>
+                </a-entity>
+                <a-entity position="0.32 -0.28 0">
+                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0"
+                        material="shader: flat"></a-plane>
+                </a-entity>
+
+                <!-- Connector line -->
+                <a-plane width="0.004" height="0.26" color="#F9CF30" position="0 -0.52 0.01"
+                    material="shader: flat; transparent: true; opacity: 0.6"></a-plane>
+
+                <!-- Info card -->
+                <a-entity position="0 -0.72 0.02">
+                    <a-plane width="1.10" height="0.006" color="#F9CF30" position="0 0.175 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="1.10" height="0.34" color="#000000" position="0 0 -0.005"
+                        material="shader: flat; transparent: true; opacity: 0.72"></a-plane>
+
+                    <a-text value="ERMAAN SINGH&#10;TAPFOLIO ARCHITECT" color="#F9CF30" align="left" width="0.82"
+                        wrap-count="24" position="-0.50 0.08 0" font="monoid" material="shader: flat"></a-text>
+
+                    <a-plane width="0.004" height="0.22" color="#F9CF30" position="0.08 0 0"
+                        material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
+
+                    <a-text value="API SECURITY | LOCAL LLM&#10;OWASP TOP 10 | C++ / PY" color="#FFFFFF" align="left"
+                        width="0.76" wrap-count="24" position="0.12 0.08 0" font="monoid"
+                        material="shader: flat"></a-text>
+
+                    <a-text value="4.0 GPA  //  CLEARANCE: ADMIN  //  CYBER DEFENSE" color="#888888" align="center"
+                        width="0.88" wrap-count="34" position="0 -0.12 0" font="monoid"
+                        material="shader: flat"></a-text>
+
+                    <a-plane width="1.10" height="0.004" color="#333333" position="0 -0.172 0"
+                        material="shader: flat"></a-plane>
+                </a-entity>
+
             </a-entity>
-            <a-entity position="0.32 0.28 0">
-                <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
-                    material="shader: flat"></a-plane>
-                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
-                    material="shader: flat"></a-plane>
-            </a-entity>
-            <a-entity position="-0.32 -0.28 0">
-                <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
-                    material="shader: flat"></a-plane>
-                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0"
-                    material="shader: flat"></a-plane>
-            </a-entity>
-            <a-entity position="0.32 -0.28 0">
-                <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
-                    material="shader: flat"></a-plane>
-                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0"
-                    material="shader: flat"></a-plane>
-            </a-entity>
-
-            <!-- Connector line -->
-            <a-plane width="0.004" height="0.26" color="#F9CF30" position="0 -0.52 0.01"
-                material="shader: flat; transparent: true; opacity: 0.6"></a-plane>
-
-            <!-- Info card -->
-            <a-entity position="0 -0.72 0.02">
-
-                <a-plane width="1.10" height="0.006" color="#F9CF30" position="0 0.175 0"
-                    material="shader: flat"></a-plane>
-                <a-plane width="1.10" height="0.34" color="#000000" position="0 0 -0.005"
-                    material="shader: flat; transparent: true; opacity: 0.72"></a-plane>
-
-                <a-text value="ERMAAN SINGH&#10;TAPFOLIO FOUNDER" color="#F9CF30" align="left" width="0.82"
-                    wrap-count="24" position="-0.50 0.08 0" font="monoid" material="shader: flat"></a-text>
-
-                <a-plane width="0.004" height="0.22" color="#F9CF30" position="0.08 0 0"
-                    material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
-
-                <a-text value="API SECURITY | C++ " color="#FFFFFF" align="left" width="0.76" wrap-count="24"
-                    position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
-
-                <a-text value="4.0 GPA  //  ROLE : STUDENT  //  CYBERSECURITY" color="#888888" align="center"
-                    width="0.88" wrap-count="34" position="0 -0.12 0" font="monoid" material="shader: flat"></a-text>
-
-                <a-plane width="1.10" height="0.004" color="#333333" position="0 -0.172 0"
-                    material="shader: flat"></a-plane>
-
-            </a-entity>
-
-        </a-entity>
         </a-scene>
     </div>
 
     <script>
-        let arReady = false;
-
+        // Cleaned up event listeners
         window.addEventListener('DOMContentLoaded', () => {
             const sceneEl = document.querySelector('a-scene');
-            const onReady = () => { arReady = true; };
-
-            if (sceneEl.hasLoaded) {
-                onReady();
-            } else {
-                sceneEl.addEventListener('loaded', onReady);
+            if (!sceneEl.hasLoaded) {
+                sceneEl.addEventListener('loaded', () => { });
             }
-            sceneEl.addEventListener('arReady', () => { arReady = true; });
         });
 
         function captureHUD() {
@@ -201,24 +181,22 @@
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
+            // Force WebGL render so the 3D graphics are present
             sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
             const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
             if (!aframeCanvas) return;
 
-            const rect = document.getElementById('example-container').getBoundingClientRect();
-            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const cw = aframeCanvas.width;
+            const ch = aframeCanvas.height;
+
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = Math.round(rect.width * dpr);
-            finalCanvas.height = Math.round(rect.height * dpr);
+            finalCanvas.width = cw;
+            finalCanvas.height = ch;
             const ctx = finalCanvas.getContext('2d');
 
-            // THE FIX: Hardcoded to true so it doesn't crash looking for 'currentCam'
-            const isSelfie = true;
-
-            const vw = video.videoWidth || 1280;
-            const vh = video.videoHeight || 720;
-            const cw = finalCanvas.width;
-            const ch = finalCanvas.height;
+            // Complex cropping math to ensure the raw video matches the device aspect ratio exactly
+            const vw = video.videoWidth;
+            const vh = video.videoHeight;
             const videoRatio = vw / vh;
             const canvasRatio = cw / ch;
 
@@ -235,16 +213,18 @@
                 sy = (vh - sh) / 2;
             }
 
-            ctx.save();
-            if (isSelfie) {
-                ctx.translate(cw, 0);
-                ctx.scale(-1, 1);
-            }
+            // 1. Draw raw video feed (it is naturally un-mirrored in memory)
             ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
+
+            // 2. Draw AR Canvas. The AR Canvas is naturally mirrored in memory, 
+            // so we flip it in the 2D context to make the final photo readable.
+            ctx.save();
+            ctx.translate(cw, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(aframeCanvas, 0, 0, cw, ch);
             ctx.restore();
 
-            ctx.drawImage(aframeCanvas, 0, 0, cw, ch);
-
+            // Trigger download
             const link = document.createElement('a');
             link.download = 'TapFolio-Record.png';
             link.href = finalCanvas.toDataURL('image/png', 1.0);
