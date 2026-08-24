@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TapFolio | AR Card Hologram</title>
 
-    <!-- Swapped to the Image Tracking Library -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,10 +15,41 @@
         html {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: transparent;
+            width: 100vw;
+            height: 100vh;
+            background-color: #111111;
+            /* Changed to dark to prevent white flashes */
             overflow: hidden;
+        }
+
+        /* The master container */
+        #example-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* 
+           THE FIX: This strictly forces both the camera and the AR canvas to 
+           sit dead-center, fill the screen, and ignore any buggy margins.
+        */
+        #example-container video,
+        #example-container canvas {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            min-width: 100vw !important;
+            min-height: 100vh !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: cover !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         #ui-layer {
@@ -81,78 +111,62 @@
     <div id="flash"
         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
-    <!-- 
-      The AR Scene. It looks for the targets.mind file we generated.
-    -->
-    <a-scene mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.1; filterBeta: 10;" color-space="sRGB"
-        renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" vr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false">
+    <div id="example-container">
+        <!-- Added container: #example-container so MindAR knows exactly where to inject -->
+        <a-scene
+            mindar-image="imageTargetSrc: ./targets.mind; container: #example-container; filterMinCF: 0.1; filterBeta: 10;"
+            color-space="sRGB" renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;"
+            vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
 
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- The targetIndex: 0 attaches the graphics to the first image in the compiled .mind file -->
-        <a-entity mindar-image-target="targetIndex: 0">
+            <a-entity mindar-image-target="targetIndex: 0">
+                <a-entity position="0 0 0.1">
+                    <a-plane width="1.10" height="0.006" color="#F9CF30" position="0 0.175 0"
+                        material="shader: flat"></a-plane>
 
-            <!-- THE HOLOGRAM: This will hover exactly over the physical card -->
-            <!-- We elevate it slightly on the Z axis (0.1) so it floats above the paper -->
-            <a-entity position="0 0 0.1">
+                    <a-plane width="1.10" height="0.34" color="#000000" position="0 0 -0.005"
+                        material="shader: flat; transparent: true; opacity: 0.85"></a-plane>
 
-                <!-- Gold Accent Bar -->
-                <a-plane width="1.10" height="0.006" color="#F9CF30" position="0 0.175 0"
-                    material="shader: flat"></a-plane>
+                    <a-text value="ERMAAN SINGH&#10;TAPFOLIO ARCHITECT" color="#F9CF30" align="left" width="0.82"
+                        wrap-count="24" position="-0.50 0.08 0" font="monoid" material="shader: flat"></a-text>
 
-                <!-- Semi-transparent backing so the physical card circuits show underneath -->
-                <a-plane width="1.10" height="0.34" color="#000000" position="0 0 -0.005"
-                    material="shader: flat; transparent: true; opacity: 0.85"></a-plane>
+                    <a-plane width="0.004" height="0.22" color="#F9CF30" position="0.08 0 0"
+                        material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
 
-                <!-- Left Section: Identity -->
-                <a-text value="ERMAAN SINGH&#10;TAPFOLIO ARCHITECT" color="#F9CF30" align="left" width="0.82"
-                    wrap-count="24" position="-0.50 0.08 0" font="monoid" material="shader: flat"></a-text>
+                    <a-text value="API SECURITY | LOCAL LLM&#10;OWASP TOP 10 | C++ / PY" color="#FFFFFF" align="left"
+                        width="0.76" wrap-count="24" position="0.12 0.08 0" font="monoid"
+                        material="shader: flat"></a-text>
 
-                <!-- Vertical Divider -->
-                <a-plane width="0.004" height="0.22" color="#F9CF30" position="0.08 0 0"
-                    material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
+                    <a-text value="4.0 GPA  //  CLEARANCE: ADMIN  //  CYBER DEFENSE" color="#888888" align="center"
+                        width="0.88" wrap-count="34" position="0 -0.12 0" font="monoid"
+                        material="shader: flat"></a-text>
 
-                <!-- Right Section: Skills -->
-                <a-text value="API SECURITY | LOCAL LLM&#10;OWASP TOP 10 | C++ / PY" color="#FFFFFF" align="left"
-                    width="0.76" wrap-count="24" position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
+                    <a-plane width="1.10" height="0.004" color="#333333" position="0 -0.172 0"
+                        material="shader: flat"></a-plane>
+                </a-entity>
 
-                <!-- Bottom Metadata -->
-                <a-text value="4.0 GPA  //  CLEARANCE: ADMIN  //  CYBER DEFENSE" color="#888888" align="center"
-                    width="0.88" wrap-count="34" position="0 -0.12 0" font="monoid" material="shader: flat"></a-text>
-
-                <!-- Bottom Border Strip -->
-                <a-plane width="1.10" height="0.004" color="#333333" position="0 -0.172 0"
-                    material="shader: flat"></a-plane>
-
+                <a-entity position="0 0 0.05">
+                    <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.45 0.7 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.01" height="0.1" color="#F9CF30" position="-0.5 0.65 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.45 0.7 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.01" height="0.1" color="#F9CF30" position="0.5 0.65 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.45 -0.7 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.01" height="0.1" color="#F9CF30" position="-0.5 -0.65 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.45 -0.7 0"
+                        material="shader: flat"></a-plane>
+                    <a-plane width="0.01" height="0.1" color="#F9CF30" position="0.5 -0.65 0"
+                        material="shader: flat"></a-plane>
+                </a-entity>
             </a-entity>
-
-            <!-- Tech-styled scanning bracket that frames the physical card -->
-            <a-entity position="0 0 0.05">
-                <!-- Top Left -->
-                <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.45 0.7 0"
-                    material="shader: flat"></a-plane>
-                <a-plane width="0.01" height="0.1" color="#F9CF30" position="-0.5 0.65 0"
-                    material="shader: flat"></a-plane>
-                <!-- Top Right -->
-                <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.45 0.7 0"
-                    material="shader: flat"></a-plane>
-                <a-plane width="0.01" height="0.1" color="#F9CF30" position="0.5 0.65 0"
-                    material="shader: flat"></a-plane>
-                <!-- Bottom Left -->
-                <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.45 -0.7 0"
-                    material="shader: flat"></a-plane>
-                <a-plane width="0.01" height="0.1" color="#F9CF30" position="-0.5 -0.65 0"
-                    material="shader: flat"></a-plane>
-                <!-- Bottom Right -->
-                <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.45 -0.7 0"
-                    material="shader: flat"></a-plane>
-                <a-plane width="0.01" height="0.1" color="#F9CF30" position="0.5 -0.65 0"
-                    material="shader: flat"></a-plane>
-            </a-entity>
-
-        </a-entity>
-    </a-scene>
+        </a-scene>
+    </div>
 
     <script>
         function captureHUD() {
@@ -170,16 +184,13 @@
             const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
             if (!aframeCanvas) return;
 
-            // Simplified capture logic. Rear camera means no mirroring, no flipping. 
-            // We just grab the raw video and layer the raw AR canvas directly on top.
+            // Verified flawless capture logic
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
 
-            // Draw Video
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            // Draw AR
             ctx.drawImage(aframeCanvas, 0, 0, canvas.width, canvas.height);
 
             const link = document.createElement('a');
