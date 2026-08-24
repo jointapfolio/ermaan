@@ -206,7 +206,7 @@
                     material="shader: flat; transparent: true; opacity: 0.72"></a-plane>
 
                 <!-- Left section: Identity (gold) -->
-                <a-text value="ERMAAN SINGH&#10;FOUNDER, TAPFOLIO" color="#F9CF30" align="left" width="0.82"
+                <a-text value="ERMAAN SINGH&#10;TAPFOLIO FOUNDER" color="#F9CF30" align="left" width="0.82"
                     wrap-count="24" position="-0.50 0.08 0" font="monoid" material="shader: flat"></a-text>
 
                 <!-- Vertical divider -->
@@ -214,11 +214,11 @@
                     material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
 
                 <!-- Right section: Skills (white) -->
-                <a-text value="INFO SEC  |  CYBER DEF&#10;PYTHON  |  WIRESHARK" color="#FFFFFF" align="left"
-                    width="0.76" wrap-count="24" position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
+                <a-text value="API SECURITY | LOCAL LLM | C++ / PY" color="#FFFFFF" align="left" width="0.76"
+                    wrap-count="24" position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
 
                 <!-- Bottom metadata row (grey) -->
-                <a-text value="4.0 GPA  //  CLEARANCE: INTERN  //  IT STUDENT" color="#888888" align="center"
+                <a-text value="4.0 GPA  //  ROLE : STUDENT  //  CYBERSECURITY" color="#888888" align="center"
                     width="0.88" wrap-count="34" position="0 -0.12 0" font="monoid" material="shader: flat"></a-text>
 
                 <!-- Bottom border strip -->
@@ -239,11 +239,9 @@
         function applyVideoMirror() {
             const video = document.querySelector('#example-container video');
             if (!video) return;
-            if (currentCam === 'user') {
-                video.style.setProperty('transform', 'translate(-50%, -50%) scaleX(-1)', 'important');
-            } else {
-                video.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
-            }
+            // MindAR handles its own mirroring internally — do not fight it with scaleX(-1).
+            // Apply only the centering transform for both camera modes.
+            video.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
         }
 
         function updateLabel() {
