@@ -11,13 +11,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: #000;
+            background: transparent;
         }
 
         /* A-Frame scene fills the full viewport */
@@ -99,8 +100,7 @@
     <!-- HTML UI overlay -->
     <div id="ui-layer">
         <div class="flex justify-between items-start">
-            <a href="index.html" class="brutalist-btn"
-               style="padding: 0.5rem 1rem; background: #FFFFFF;">&lt; BACK</a>
+            <a href="index.html" class="brutalist-btn" style="padding: 0.5rem 1rem; background: #FFFFFF;">&lt; BACK</a>
 
             <div class="text-xs font-mono font-bold text-white bg-black px-2 py-1
                         border border-[#F9CF30] flex items-center gap-2">
@@ -120,7 +120,7 @@
 
     <!-- Flash effect -->
     <div id="flash"
-         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150">
+        class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150">
     </div>
 
     <!--
@@ -129,11 +129,9 @@
         MindAR defaults to the front camera and manages its own video
         transform. We stay completely out of its way.
     -->
-    <a-scene mindar-face embedded
-             color-space="sRGB"
-             renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;"
-             vr-mode-ui="enabled: false"
-             device-orientation-permission-ui="enabled: false">
+    <a-scene mindar-face embedded color-space="sRGB"
+        renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false">
 
         <a-camera active="false" position="0 0 0"></a-camera>
 
@@ -147,76 +145,67 @@
 
             <!-- top-left -->
             <a-entity position="-0.32 0.28 0">
-                <a-plane width="0.08" height="0.006" color="#F9CF30"
-                    position="0.04 0 0" material="shader: flat"></a-plane>
-                <a-plane width="0.006" height="0.08" color="#F9CF30"
-                    position="0 -0.04 0" material="shader: flat"></a-plane>
+                <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
+                    material="shader: flat"></a-plane>
             </a-entity>
             <!-- top-right -->
             <a-entity position="0.32 0.28 0">
-                <a-plane width="0.08" height="0.006" color="#F9CF30"
-                    position="-0.04 0 0" material="shader: flat"></a-plane>
-                <a-plane width="0.006" height="0.08" color="#F9CF30"
-                    position="0 -0.04 0" material="shader: flat"></a-plane>
+                <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
+                    material="shader: flat"></a-plane>
             </a-entity>
             <!-- bottom-left -->
             <a-entity position="-0.32 -0.28 0">
-                <a-plane width="0.08" height="0.006" color="#F9CF30"
-                    position="0.04 0 0" material="shader: flat"></a-plane>
-                <a-plane width="0.006" height="0.08" color="#F9CF30"
-                    position="0 0.04 0" material="shader: flat"></a-plane>
+                <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0"
+                    material="shader: flat"></a-plane>
             </a-entity>
             <!-- bottom-right -->
             <a-entity position="0.32 -0.28 0">
-                <a-plane width="0.08" height="0.006" color="#F9CF30"
-                    position="-0.04 0 0" material="shader: flat"></a-plane>
-                <a-plane width="0.006" height="0.08" color="#F9CF30"
-                    position="0 0.04 0" material="shader: flat"></a-plane>
+                <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0"
+                    material="shader: flat"></a-plane>
             </a-entity>
 
             <!-- Connector line: bottom bracket → info card -->
-            <a-plane width="0.004" height="0.26" color="#F9CF30"
-                position="0 -0.52 0.01"
+            <a-plane width="0.004" height="0.26" color="#F9CF30" position="0 -0.52 0.01"
                 material="shader: flat; transparent: true; opacity: 0.6"></a-plane>
 
             <!-- INFO CARD: below the chin, never over the face -->
             <a-entity position="0 -0.72 0.02">
 
                 <!-- Top gold accent bar -->
-                <a-plane width="1.10" height="0.006" color="#F9CF30"
-                    position="0 0.175 0" material="shader: flat"></a-plane>
+                <a-plane width="1.10" height="0.006" color="#F9CF30" position="0 0.175 0"
+                    material="shader: flat"></a-plane>
 
                 <!-- Dark semi-transparent backing -->
-                <a-plane width="1.10" height="0.34" color="#000000"
-                    position="0 0 -0.005"
+                <a-plane width="1.10" height="0.34" color="#000000" position="0 0 -0.005"
                     material="shader: flat; transparent: true; opacity: 0.72"></a-plane>
 
                 <!-- Left: Identity (gold) -->
-                <a-text value="ERMAAN SINGH&#10;TAPFOLIO FOUNDER"
-                    color="#F9CF30" align="left" width="0.82" wrap-count="24"
-                    position="-0.50 0.08 0" font="monoid"
-                    material="shader: flat"></a-text>
+                <a-text value="ERMAAN SINGH&#10;TAPFOLIO FOUNDER" color="#F9CF30" align="left" width="0.82"
+                    wrap-count="24" position="-0.50 0.08 0" font="monoid" material="shader: flat"></a-text>
 
                 <!-- Vertical divider -->
-                <a-plane width="0.004" height="0.22" color="#F9CF30"
-                    position="0.08 0 0"
+                <a-plane width="0.004" height="0.22" color="#F9CF30" position="0.08 0 0"
                     material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
 
                 <!-- Right: Skills (white) -->
-                <a-text value="API SECURITY | C++"
-                    color="#FFFFFF" align="left" width="0.76" wrap-count="24"
-                    position="0.12 0.08 0" font="monoid"
-                    material="shader: flat"></a-text>
+                <a-text value="API SECURITY | C++" color="#FFFFFF" align="left" width="0.76" wrap-count="24"
+                    position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
 
                 <!-- Bottom metadata row (grey) -->
-                <a-text value="4.0 GPA  //  ROLE : STUDENT  //  CYBERSECURITY"
-                    color="#888888" align="center" width="0.88" wrap-count="34"
-                    position="0 -0.12 0" font="monoid"
-                    material="shader: flat"></a-text>
+                <a-text value="4.0 GPA  //  ROLE : STUDENT  //  CYBERSECURITY" color="#888888" align="center"
+                    width="0.88" wrap-count="34" position="0 -0.12 0" font="monoid" material="shader: flat"></a-text>
 
                 <!-- Bottom border strip -->
-                <a-plane width="1.10" height="0.004" color="#333333"
-                    position="0 -0.172 0" material="shader: flat"></a-plane>
+                <a-plane width="1.10" height="0.004" color="#333333" position="0 -0.172 0"
+                    material="shader: flat"></a-plane>
 
             </a-entity>
 
@@ -242,17 +231,17 @@
 
             // Output canvas = what the user sees on screen
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            const cw = Math.round(window.innerWidth  * dpr);
+            const cw = Math.round(window.innerWidth * dpr);
             const ch = Math.round(window.innerHeight * dpr);
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width  = cw;
+            finalCanvas.width = cw;
             finalCanvas.height = ch;
             const ctx = finalCanvas.getContext('2d');
 
             // Replicate object-fit: cover crop math for the raw video frame
-            const vw = video.videoWidth  || 1280;
+            const vw = video.videoWidth || 1280;
             const vh = video.videoHeight || 720;
-            const videoRatio  = vw / vh;
+            const videoRatio = vw / vh;
             const canvasRatio = cw / ch;
             let sx, sy, sw, sh;
             if (videoRatio > canvasRatio) {
@@ -280,4 +269,5 @@
     </script>
 
 </body>
+
 </html>
