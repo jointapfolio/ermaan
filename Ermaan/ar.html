@@ -107,7 +107,7 @@
                 </button>
                 <div
                     class="text-xs font-mono font-bold text-white bg-black px-2 py-1 border border-[#F9CF30] flex items-center gap-2">
-                    REC <span class="animate-pulse text-red-500">●</span>
+                    REC <span class="animate-pulse text-red-500">&#9679;</span>
                 </div>
             </div>
         </div>
@@ -126,137 +126,122 @@
     <div id="flash"
         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
-    <!-- MANDATORY MINDAR STRUCTURE: The wrapper div -->
     <div id="example-container">
-        <a-scene mindar-face="facingMode: user;" embedded color-space="sRGB"
-            renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" vr-mode-ui="enabled: false"
-            device-orientation-permission-ui="enabled: false">
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const camMode = urlParams.get('cam') === 'environment' ? 'environment' : 'user';
+            const mindarAttr = camMode === 'user'
+                ? 'mindar-face'
+                : 'mindar-face="facingMode: environment"';
 
-            <a-camera active="false" position="0 0 0"></a-camera>
+            document.write(
+                '<a-scene ' + mindarAttr + ' embedded color-space="sRGB" ' +
+                'renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" ' +
+                'vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">'
+            );
+        </script>
 
-            <!--
-                anchorIndex 168 = nose bridge / mid-face center.
-                This is a stable, centred anchor so the HUD frames the face correctly.
-                anchorIndex 1 (nose tip) caused the whole overlay to sit above the head
-                because the Y offsets were measured from a point lower on the face.
+        <a-camera active="false" position="0 0 0"></a-camera>
 
-                MindAR face-space coordinates (units roughly = face width):
-                  +Y = up,  -Y = down,  +X = right,  -X = left
-                  Face is ~1 unit wide at arm's length on mobile.
-            -->
-            <a-entity mindar-face-target="anchorIndex: 168">
+        <!--
+            anchorIndex 168 = nose bridge / mid-face center.
+            This is a stable anchor so the HUD frames the face correctly.
+            anchorIndex 1 (nose tip) caused the overlay to sit above the head
+            because Y offsets were measured from a point lower on the face.
 
-                <!--
-                    CORNER BRACKETS — very slim ticks at the outer face edge only.
-                    They sit just outside the face bounding box so they never
-                    overlap skin/features. Face is ~0.55 units half-width from anchor 168.
-                    +Y = up, -Y = down. Tick arm length = 0.08 units.
-                -->
+            MindAR face-space coordinates (units roughly = face width):
+              +Y = up,  -Y = down,  +X = right,  -X = left
+        -->
+        <a-entity mindar-face-target="anchorIndex: 168">
 
-                <!-- top-left -->
-                <a-entity position="-0.32 0.28 0">
-                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0" material="shader: flat"></a-plane>
-                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0" material="shader: flat"></a-plane>
-                </a-entity>
-                <!-- top-right -->
-                <a-entity position="0.32 0.28 0">
-                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0" material="shader: flat"></a-plane>
-                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0" material="shader: flat"></a-plane>
-                </a-entity>
-                <!-- bottom-left -->
-                <a-entity position="-0.32 -0.28 0">
-                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0" material="shader: flat"></a-plane>
-                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0" material="shader: flat"></a-plane>
-                </a-entity>
-                <!-- bottom-right -->
-                <a-entity position="0.32 -0.28 0">
-                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0" material="shader: flat"></a-plane>
-                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0" material="shader: flat"></a-plane>
-                </a-entity>
+            <!-- CORNER BRACKETS: very slim ticks at the outer face edge only.
+                 They sit just outside the face bounding box so they never
+                 overlap skin or features. Tick arm length = 0.08 units. -->
 
-                <!--
-                    INFO CARD — positioned below the chin so it never touches the face.
-                    anchor 168 chin is roughly y = -0.38; card sits at y = -0.72.
-                    A thin vertical connector line links the bottom-bracket to the card.
-                -->
+            <!-- top-left -->
+            <a-entity position="-0.32 0.28 0">
+                <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
+                    material="shader: flat"></a-plane>
+            </a-entity>
+            <!-- top-right -->
+            <a-entity position="0.32 0.28 0">
+                <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
+                    material="shader: flat"></a-plane>
+            </a-entity>
+            <!-- bottom-left -->
+            <a-entity position="-0.32 -0.28 0">
+                <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0"
+                    material="shader: flat"></a-plane>
+            </a-entity>
+            <!-- bottom-right -->
+            <a-entity position="0.32 -0.28 0">
+                <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
+                    material="shader: flat"></a-plane>
+                <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0"
+                    material="shader: flat"></a-plane>
+            </a-entity>
 
-                <!-- Connector: thin vertical line from chin bracket down to card -->
-                <a-plane width="0.004" height="0.26" color="#F9CF30"
-                    position="0 -0.52 0.01"
-                    material="shader: flat; transparent: true; opacity: 0.6"></a-plane>
+            <!-- INFO CARD: positioned below the chin (y = -0.72) so it never
+                 touches the face. A thin connector line bridges the gap. -->
 
-                <!-- Card background -->
-                <a-entity position="0 -0.72 0.02">
-                    <!-- Outer border strip (top accent) -->
-                    <a-plane width="0.88" height="0.006" color="#F9CF30"
-                        position="0 0.175 0" material="shader: flat"></a-plane>
+            <!-- Connector line from bottom bracket down to card -->
+            <a-plane width="0.004" height="0.26" color="#F9CF30" position="0 -0.52 0.01"
+                material="shader: flat; transparent: true; opacity: 0.6"></a-plane>
 
-                    <!-- Dark semi-transparent backing -->
-                    <a-plane width="0.88" height="0.34" color="#000000"
-                        position="0 0 -0.005"
-                        material="shader: flat; transparent: true; opacity: 0.72"></a-plane>
+            <!-- Info card -->
+            <a-entity position="0 -0.72 0.02">
 
-                    <!-- Left section: Identity -->
-                    <a-text
-                        value="ERMAAN SINGH\nIT STUDENT  |  4.0 GPA"
-                        color="#F9CF30"
-                        align="left"
-                        width="0.72"
-                        wrap-count="22"
-                        position="-0.40 0.08 0"
-                        font="monoid"
-                        material="shader: flat"></a-text>
+                <!-- Top gold accent bar -->
+                <a-plane width="1.10" height="0.006" color="#F9CF30" position="0 0.175 0"
+                    material="shader: flat"></a-plane>
 
-                    <!-- Vertical divider -->
-                    <a-plane width="0.004" height="0.22" color="#F9CF30"
-                        position="0.05 0 0"
-                        material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
+                <!-- Dark semi-transparent backing -->
+                <a-plane width="1.10" height="0.34" color="#000000" position="0 0 -0.005"
+                    material="shader: flat; transparent: true; opacity: 0.72"></a-plane>
 
-                    <!-- Right section: Skills (compact single column) -->
-                    <a-text
-                        value="INFO SEC  |  CYBER DEF\nC++  /  PYTHON  |  WIRESHARK"
-                        color="#FFFFFF"
-                        align="left"
-                        width="0.66"
-                        wrap-count="22"
-                        position="0.08 0.08 0"
-                        font="monoid"
-                        material="shader: flat"></a-text>
+                <!-- Left section: Identity (gold) -->
+                <a-text value="ERMAAN SINGH&#10;FOUNDER, TAPFOLIO" color="#F9CF30" align="left" width="0.82"
+                    wrap-count="24" position="-0.50 0.08 0" font="monoid" material="shader: flat"></a-text>
 
-                    <!-- Bottom label row -->
-                    <a-text
-                        value="CLEARANCE: INTERN  //  ROLE: IT"
-                        color="#888888"
-                        align="center"
-                        width="0.72"
-                        wrap-count="30"
-                        position="0 -0.12 0"
-                        font="monoid"
-                        material="shader: flat"></a-text>
+                <!-- Vertical divider -->
+                <a-plane width="0.004" height="0.22" color="#F9CF30" position="0.08 0 0"
+                    material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
 
-                    <!-- Bottom border strip -->
-                    <a-plane width="0.88" height="0.004" color="#333333"
-                        position="0 -0.172 0" material="shader: flat"></a-plane>
-                </a-entity>
+                <!-- Right section: Skills (white) -->
+                <a-text value="INFO SEC  |  CYBER DEF&#10;PYTHON  |  WIRESHARK" color="#FFFFFF" align="left"
+                    width="0.76" wrap-count="24" position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
+
+                <!-- Bottom metadata row (grey) -->
+                <a-text value="4.0 GPA  //  CLEARANCE: INTERN  //  IT STUDENT" color="#888888" align="center"
+                    width="0.88" wrap-count="34" position="0 -0.12 0" font="monoid" material="shader: flat"></a-text>
+
+                <!-- Bottom border strip -->
+                <a-plane width="1.10" height="0.004" color="#333333" position="0 -0.172 0"
+                    material="shader: flat"></a-plane>
 
             </a-entity>
+
+        </a-entity>
         </a-scene>
     </div> <!-- End wrapper div -->
 
     <script>
-        // Track which camera is currently active
-        let currentCam = 'user';
+        const _urlParams = new URLSearchParams(window.location.search);
+        let currentCam = _urlParams.get('cam') === 'environment' ? 'environment' : 'user';
         let arReady = false;
 
-        // Apply/remove scaleX(-1) to un-mirror the front camera feed
         function applyVideoMirror() {
             const video = document.querySelector('#example-container video');
             if (!video) return;
             if (currentCam === 'user') {
-                // Front cam: un-mirror so it looks natural (not selfie-flipped)
                 video.style.setProperty('transform', 'translate(-50%, -50%) scaleX(-1)', 'important');
             } else {
-                // Rear cam: no mirror
                 video.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
             }
         }
@@ -266,7 +251,6 @@
             el.innerText = currentCam === 'user' ? 'SELFIE MODE ALIGNED' : 'SCAN TARGET: ERMAAN';
         }
 
-        // Use MindAR's built-in switchCamera() — no page reload needed
         function flipCamera() {
             if (!arReady) return;
             const sceneEl = document.querySelector('a-scene');
@@ -278,7 +262,6 @@
             arSystem.switchCamera();
             currentCam = (currentCam === 'user') ? 'environment' : 'user';
             updateLabel();
-            // Re-apply mirror after a short delay so the new video stream is attached
             setTimeout(applyVideoMirror, 600);
         }
 
@@ -297,7 +280,6 @@
                 sceneEl.addEventListener('loaded', onReady);
             }
 
-            // MindAR fires 'arReady' once tracking is initialised — more reliable
             sceneEl.addEventListener('arReady', () => {
                 arReady = true;
                 setTimeout(applyVideoMirror, 300);
@@ -314,13 +296,10 @@
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
-            // Force synchronous render
             sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
             const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
             if (!aframeCanvas) return;
 
-            // FIX: output at the size the user actually SEES on screen
-            // (the container), not the video's native camera resolution.
             const rect = document.getElementById('example-container').getBoundingClientRect();
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
             const finalCanvas = document.createElement('canvas');
@@ -330,7 +309,6 @@
 
             const isSelfie = (currentCam === 'user');
 
-            // Replicate CSS `object-fit: cover` crop math
             const vw = video.videoWidth || 1280;
             const vh = video.videoHeight || 720;
             const cw = finalCanvas.width;
@@ -353,17 +331,14 @@
 
             ctx.save();
             if (isSelfie) {
-                // Flip the canvas horizontally so the saved image is un-mirrored
                 ctx.translate(cw, 0);
                 ctx.scale(-1, 1);
             }
             ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
             ctx.restore();
 
-            // Draw the AR HUD layer on top
             ctx.drawImage(aframeCanvas, 0, 0, cw, ch);
 
-            // Save File
             const link = document.createElement('a');
             link.download = 'TapFolio-Record.png';
             link.href = finalCanvas.toDataURL('image/png', 1.0);
