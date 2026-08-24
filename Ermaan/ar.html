@@ -18,53 +18,33 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: transparent;
+            background-color: transparent;
         }
 
-        /* A-Frame scene fills the full viewport */
-        a-scene {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
+        #example-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
         }
 
-        /*
-         * ─── THE CRITICAL FIX ───────────────────────────────────────────────
-         * MindAR applies  transform: rotateY(180deg)  to the video element
-         * for the selfie mirror. It ALSO calibrates the 3D tracking coordinate
-         * space to match that mirror. Every previous version overrode that
-         * transform with !important — the video un-mirrored visually while the
-         * 3D coordinate space stayed "mirrored", so the HUD moved opposite to
-         * the face (the X-axis inversion bug).
-         *
-         * FIX: Only control SIZE and object-fit. NEVER touch transform.
-         * MindAR keeps its rotateY(180deg) → video shows as selfie mirror AND
-         * the 3D coordinate system matches → tracking is correct.
-         */
-        a-scene video {
-            position: fixed !important;
+        /* 
+           THE FIX: We use object-fit: cover to flawlessly center and crop the video 
+           to any mobile screen size. We REMOVED the 'transform' override so MindAR 
+           can natively mirror the video and tracking matrix in perfect sync.
+        */
+        #example-container video,
+        #example-container canvas {
+            position: absolute !important;
             top: 0 !important;
             left: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
             object-fit: cover !important;
-            /* transform: intentionally NOT set — this property is owned by MindAR */
         }
 
-        /* Canvas: pin to viewport, no transforms */
-        a-scene canvas {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-        }
-
-        /* UI overlay */
         #ui-layer {
-            position: fixed;
+            position: absolute;
             inset: 0;
             z-index: 999;
             pointer-events: none;
@@ -97,14 +77,15 @@
 
 <body>
 
-    <!-- HTML UI overlay -->
     <div id="ui-layer">
         <div class="flex justify-between items-start">
             <a href="index.html" class="brutalist-btn" style="padding: 0.5rem 1rem; background: #FFFFFF;">&lt; BACK</a>
 
-            <div class="text-xs font-mono font-bold text-white bg-black px-2 py-1
-                        border border-[#F9CF30] flex items-center gap-2">
-                REC <span class="animate-pulse text-red-500">&#9679;</span>
+            <div class="flex gap-2">
+                <div
+                    class="text-xs font-mono font-bold text-white bg-black px-2 py-1 border border-[#F9CF30] flex items-center gap-2">
+                    REC <span class="animate-pulse text-red-500">&#9679;</span>
+                </div>
             </div>
         </div>
 
@@ -112,59 +93,49 @@
             <button onclick="captureHUD()" class="brutalist-btn w-full max-w-sm mx-auto">
                 [ CAPTURE HUD RECORD ]
             </button>
-            <p class="text-[#F9CF30] font-mono text-xs mt-3 font-bold bg-black/50 inline-block px-2">
+            <p class="text-[#F9CF30] font-mono text-xs mt-3 font-bold bg-black/50 inline-block px-2"
+                id="cam-instruction">
                 SELFIE MODE ALIGNED
             </p>
         </div>
     </div>
 
-    <!-- Flash effect -->
     <div id="flash"
-        class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150">
-    </div>
+        class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
-    <!--
-        MindAR + A-Frame scene.
-        No document.write(), no wrapper div, no facingMode parameter.
-        MindAR defaults to the front camera and manages its own video
-        transform. We stay completely out of its way.
-    -->
-    <a-scene mindar-face embedded color-space="sRGB"
-        renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" vr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false">
+    <div id="example-container">
+        <script>
+            // Using default mindar-face ensures the 3D space and video mirror are locked together natively.
+            document.write(
+                '<a-scene mindar-face embedded color-space="sRGB" ' +
+                'renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" ' +
+                'vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">'
+            );
+        </script>
 
         <a-camera active="false" position="0 0 0"></a-camera>
 
-        <!--
-            anchorIndex 168 = nose bridge — stable mid-face anchor.
-            MindAR face-space: +Y up, -Y down, +X right, -X left.
-        -->
         <a-entity mindar-face-target="anchorIndex: 168">
 
-            <!-- CORNER BRACKETS: 4 slim gold ticks at the face boundary -->
-
-            <!-- top-left -->
+            <!-- CORNER BRACKETS -->
             <a-entity position="-0.32 0.28 0">
                 <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
                     material="shader: flat"></a-plane>
                 <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
                     material="shader: flat"></a-plane>
             </a-entity>
-            <!-- top-right -->
             <a-entity position="0.32 0.28 0">
                 <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
                     material="shader: flat"></a-plane>
                 <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0"
                     material="shader: flat"></a-plane>
             </a-entity>
-            <!-- bottom-left -->
             <a-entity position="-0.32 -0.28 0">
                 <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0"
                     material="shader: flat"></a-plane>
                 <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0"
                     material="shader: flat"></a-plane>
             </a-entity>
-            <!-- bottom-right -->
             <a-entity position="0.32 -0.28 0">
                 <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0"
                     material="shader: flat"></a-plane>
@@ -172,93 +143,106 @@
                     material="shader: flat"></a-plane>
             </a-entity>
 
-            <!-- Connector line: bottom bracket → info card -->
+            <!-- Connector line -->
             <a-plane width="0.004" height="0.26" color="#F9CF30" position="0 -0.52 0.01"
                 material="shader: flat; transparent: true; opacity: 0.6"></a-plane>
 
-            <!-- INFO CARD: below the chin, never over the face -->
+            <!-- Info card -->
             <a-entity position="0 -0.72 0.02">
 
-                <!-- Top gold accent bar -->
                 <a-plane width="1.10" height="0.006" color="#F9CF30" position="0 0.175 0"
                     material="shader: flat"></a-plane>
-
-                <!-- Dark semi-transparent backing -->
                 <a-plane width="1.10" height="0.34" color="#000000" position="0 0 -0.005"
                     material="shader: flat; transparent: true; opacity: 0.72"></a-plane>
 
-                <!-- Left: Identity (gold) -->
                 <a-text value="ERMAAN SINGH&#10;TAPFOLIO FOUNDER" color="#F9CF30" align="left" width="0.82"
                     wrap-count="24" position="-0.50 0.08 0" font="monoid" material="shader: flat"></a-text>
 
-                <!-- Vertical divider -->
                 <a-plane width="0.004" height="0.22" color="#F9CF30" position="0.08 0 0"
                     material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
 
-                <!-- Right: Skills (white) -->
-                <a-text value="API SECURITY | C++" color="#FFFFFF" align="left" width="0.76" wrap-count="24"
+                <a-text value="API SECURITY | C++ " color="#FFFFFF" align="left" width="0.76" wrap-count="24"
                     position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
 
-                <!-- Bottom metadata row (grey) -->
                 <a-text value="4.0 GPA  //  ROLE : STUDENT  //  CYBERSECURITY" color="#888888" align="center"
                     width="0.88" wrap-count="34" position="0 -0.12 0" font="monoid" material="shader: flat"></a-text>
 
-                <!-- Bottom border strip -->
                 <a-plane width="1.10" height="0.004" color="#333333" position="0 -0.172 0"
                     material="shader: flat"></a-plane>
 
             </a-entity>
 
         </a-entity>
-    </a-scene>
+        </a-scene>
+    </div>
 
     <script>
+        let arReady = false;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const sceneEl = document.querySelector('a-scene');
+            const onReady = () => { arReady = true; };
+
+            if (sceneEl.hasLoaded) {
+                onReady();
+            } else {
+                sceneEl.addEventListener('loaded', onReady);
+            }
+            sceneEl.addEventListener('arReady', () => { arReady = true; });
+        });
+
         function captureHUD() {
-            const video = document.querySelector('a-scene video');
+            const video = document.querySelector('#example-container video');
             const sceneEl = document.querySelector('a-scene');
 
             if (!video || !sceneEl || !sceneEl.components.screenshot) return;
 
-            // Flash
             const flash = document.getElementById('flash');
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
-            // Force a fresh render so the canvas buffer is current
             sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
             const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
             if (!aframeCanvas) return;
 
-            // Output canvas = what the user sees on screen
+            const rect = document.getElementById('example-container').getBoundingClientRect();
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            const cw = Math.round(window.innerWidth * dpr);
-            const ch = Math.round(window.innerHeight * dpr);
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = cw;
-            finalCanvas.height = ch;
+            finalCanvas.width = Math.round(rect.width * dpr);
+            finalCanvas.height = Math.round(rect.height * dpr);
             const ctx = finalCanvas.getContext('2d');
 
-            // Replicate object-fit: cover crop math for the raw video frame
+            // THE FIX: Hardcoded to true so it doesn't crash looking for 'currentCam'
+            const isSelfie = true;
+
             const vw = video.videoWidth || 1280;
             const vh = video.videoHeight || 720;
+            const cw = finalCanvas.width;
+            const ch = finalCanvas.height;
             const videoRatio = vw / vh;
             const canvasRatio = cw / ch;
+
             let sx, sy, sw, sh;
             if (videoRatio > canvasRatio) {
-                sh = vh; sw = vh * canvasRatio; sx = (vw - sw) / 2; sy = 0;
+                sh = vh;
+                sw = vh * canvasRatio;
+                sx = (vw - sw) / 2;
+                sy = 0;
             } else {
-                sw = vw; sh = vw / canvasRatio; sx = 0; sy = (vh - sh) / 2;
+                sw = vw;
+                sh = vw / canvasRatio;
+                sx = 0;
+                sy = (vh - sh) / 2;
             }
 
             ctx.save();
-            // MindAR's rotateY(180deg) is CSS-only; raw video pixels are un-mirrored.
-            // Flip here so the saved image matches what the user saw (selfie view).
-            ctx.translate(cw, 0);
-            ctx.scale(-1, 1);
+            if (isSelfie) {
+                ctx.translate(cw, 0);
+                ctx.scale(-1, 1);
+            }
             ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
             ctx.restore();
 
-            // Composite the AR HUD on top
             ctx.drawImage(aframeCanvas, 0, 0, cw, ch);
 
             const link = document.createElement('a');
@@ -267,7 +251,6 @@
             link.click();
         }
     </script>
-
 </body>
 
 </html>
