@@ -146,55 +146,97 @@
             -->
             <a-entity mindar-face-target="anchorIndex: 168">
 
-                <!-- Cyber-Bracket: top-left corner -->
-                <a-entity position="-0.28 0.22 0">
-                    <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0"
-                        material="shader: flat"></a-plane>
-                    <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0"
-                        material="shader: flat"></a-plane>
+                <!--
+                    CORNER BRACKETS — very slim ticks at the outer face edge only.
+                    They sit just outside the face bounding box so they never
+                    overlap skin/features. Face is ~0.55 units half-width from anchor 168.
+                    +Y = up, -Y = down. Tick arm length = 0.08 units.
+                -->
+
+                <!-- top-left -->
+                <a-entity position="-0.32 0.28 0">
+                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0" material="shader: flat"></a-plane>
+                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0" material="shader: flat"></a-plane>
                 </a-entity>
-                <!-- Cyber-Bracket: top-right corner -->
-                <a-entity position="0.28 0.22 0">
-                    <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0"
-                        material="shader: flat"></a-plane>
-                    <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 -0.05 0"
-                        material="shader: flat"></a-plane>
+                <!-- top-right -->
+                <a-entity position="0.32 0.28 0">
+                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0" material="shader: flat"></a-plane>
+                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 -0.04 0" material="shader: flat"></a-plane>
                 </a-entity>
-                <!-- Cyber-Bracket: bottom-left corner -->
-                <a-entity position="-0.28 -0.22 0">
-                    <a-plane width="0.1" height="0.01" color="#F9CF30" position="0.05 0 0"
-                        material="shader: flat"></a-plane>
-                    <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0"
-                        material="shader: flat"></a-plane>
+                <!-- bottom-left -->
+                <a-entity position="-0.32 -0.28 0">
+                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="0.04 0 0" material="shader: flat"></a-plane>
+                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0" material="shader: flat"></a-plane>
                 </a-entity>
-                <!-- Cyber-Bracket: bottom-right corner -->
-                <a-entity position="0.28 -0.22 0">
-                    <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.05 0 0"
-                        material="shader: flat"></a-plane>
-                    <a-plane width="0.01" height="0.1" color="#F9CF30" position="0 0.05 0"
-                        material="shader: flat"></a-plane>
+                <!-- bottom-right -->
+                <a-entity position="0.32 -0.28 0">
+                    <a-plane width="0.08" height="0.006" color="#F9CF30" position="-0.04 0 0" material="shader: flat"></a-plane>
+                    <a-plane width="0.006" height="0.08" color="#F9CF30" position="0 0.04 0" material="shader: flat"></a-plane>
                 </a-entity>
 
-                <!-- Left Panel: Skills — floats to the left of the face -->
-                <a-entity position="-0.60 0.0 0.08">
-                    <a-plane width="0.58" height="0.32" color="#000000" position="0 0 -0.01"
-                        material="shader: flat; transparent: true; opacity: 0.55"></a-plane>
-                    <a-text value="SYS_SKILLS:\n> INFO SEC\n> CYBER DEF\n> C++ / PYTHON\n> WIRESHARK" color="#FFFFFF"
-                        align="right" width="0.88" wrap-count="16" position="0.26 0.1 0" font="monoid"
-                        material="shader: flat"></a-text>
-                    <a-plane width="0.28" height="0.008" color="#F9CF30" position="-0.14 -0.14 0"
-                        material="shader: flat"></a-plane>
-                </a-entity>
+                <!--
+                    INFO CARD — positioned below the chin so it never touches the face.
+                    anchor 168 chin is roughly y = -0.38; card sits at y = -0.72.
+                    A thin vertical connector line links the bottom-bracket to the card.
+                -->
 
-                <!-- Right Panel: ID — floats to the right of the face -->
-                <a-entity position="0.60 0.0 0.08">
-                    <a-plane width="0.58" height="0.32" color="#000000" position="0 0 -0.01"
-                        material="shader: flat; transparent: true; opacity: 0.55"></a-plane>
-                    <a-text value="ID: ERMAAN SINGH\nSTATUS: 4.0 GPA\nROLE: IT STUDENT\nCLEARANCE: INTERN"
-                        color="#F9CF30" align="left" width="0.88" wrap-count="16" position="-0.26 0.1 0" font="monoid"
+                <!-- Connector: thin vertical line from chin bracket down to card -->
+                <a-plane width="0.004" height="0.26" color="#F9CF30"
+                    position="0 -0.52 0.01"
+                    material="shader: flat; transparent: true; opacity: 0.6"></a-plane>
+
+                <!-- Card background -->
+                <a-entity position="0 -0.72 0.02">
+                    <!-- Outer border strip (top accent) -->
+                    <a-plane width="0.88" height="0.006" color="#F9CF30"
+                        position="0 0.175 0" material="shader: flat"></a-plane>
+
+                    <!-- Dark semi-transparent backing -->
+                    <a-plane width="0.88" height="0.34" color="#000000"
+                        position="0 0 -0.005"
+                        material="shader: flat; transparent: true; opacity: 0.72"></a-plane>
+
+                    <!-- Left section: Identity -->
+                    <a-text
+                        value="ERMAAN SINGH\nIT STUDENT  |  4.0 GPA"
+                        color="#F9CF30"
+                        align="left"
+                        width="0.72"
+                        wrap-count="22"
+                        position="-0.40 0.08 0"
+                        font="monoid"
                         material="shader: flat"></a-text>
-                    <a-plane width="0.28" height="0.008" color="#FFFFFF" position="0.14 -0.14 0"
-                        material="shader: flat"></a-plane>
+
+                    <!-- Vertical divider -->
+                    <a-plane width="0.004" height="0.22" color="#F9CF30"
+                        position="0.05 0 0"
+                        material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
+
+                    <!-- Right section: Skills (compact single column) -->
+                    <a-text
+                        value="INFO SEC  |  CYBER DEF\nC++  /  PYTHON  |  WIRESHARK"
+                        color="#FFFFFF"
+                        align="left"
+                        width="0.66"
+                        wrap-count="22"
+                        position="0.08 0.08 0"
+                        font="monoid"
+                        material="shader: flat"></a-text>
+
+                    <!-- Bottom label row -->
+                    <a-text
+                        value="CLEARANCE: INTERN  //  ROLE: IT"
+                        color="#888888"
+                        align="center"
+                        width="0.72"
+                        wrap-count="30"
+                        position="0 -0.12 0"
+                        font="monoid"
+                        material="shader: flat"></a-text>
+
+                    <!-- Bottom border strip -->
+                    <a-plane width="0.88" height="0.004" color="#333333"
+                        position="0 -0.172 0" material="shader: flat"></a-plane>
                 </a-entity>
 
             </a-entity>
@@ -323,7 +365,7 @@
 
             // Save File
             const link = document.createElement('a');
-            link.download = 'TapFolio-Clearance-Record.png';
+            link.download = 'TapFolio-Record.png';
             link.href = finalCanvas.toDataURL('image/png', 1.0);
             link.click();
         }
