@@ -17,14 +17,39 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #111111;
+            overflow: hidden;
+            background-color: transparent;
+        }
+
+        /* RESTORED: Your original working container that prevents the black screen */
+        #example-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
             overflow: hidden;
         }
 
-        /* 
-           UI Layer stays on top. We let A-Frame/MindAR natively append 
-           the video and canvas directly to the body to prevent black screens.
-        */
+        /* RESTORED: Your original working video CSS that prevents motion sickness */
+        #example-container video {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            width: auto !important;
+            height: auto !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            transform: translate(-50%, -50%) scaleX(-1) !important;
+            object-fit: cover;
+        }
+
+        #example-container canvas {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
         #ui-layer {
             position: absolute;
             inset: 0;
@@ -75,7 +100,8 @@
             <button onclick="captureHUD()" class="brutalist-btn w-full max-w-sm mx-auto">
                 [ CAPTURE HUD RECORD ]
             </button>
-            <p class="text-[#F9CF30] font-mono text-xs mt-3 font-bold bg-black/50 inline-block px-2">
+            <p class="text-[#F9CF30] font-mono text-xs mt-3 font-bold bg-black/50 inline-block px-2"
+                id="cam-instruction">
                 SELFIE MODE ALIGNED
             </p>
         </div>
@@ -84,17 +110,19 @@
     <div id="flash"
         class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
 
-    <!-- 
-      No embedded tag, no container. MindAR automatically stretches 
-      to fill the entire screen, preventing the black screen bug. 
-    -->
-    <a-scene mindar-face color-space="sRGB" renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;"
-        vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+    <div id="example-container">
+        <script>
+            document.write(
+                '<a-scene mindar-face embedded color-space="sRGB" ' +
+                'renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" ' +
+                'vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">'
+            );
+        </script>
 
         <a-camera active="false" position="0 0 0"></a-camera>
 
-        <!-- anchorIndex 168 = nose bridge -->
-        <a-entity mindar-face-target="anchorIndex: 168">
+        <!-- THE TRACKING FIX: scale="-1 1 1" inverts the X-axis of the tracking so it matches your face flawlessly -->
+        <a-entity mindar-face-target="anchorIndex: 168" scale="-1 1 1">
 
             <!-- CORNER BRACKETS -->
             <a-entity position="-0.32 0.28 0">
@@ -122,40 +150,59 @@
                     material="shader: flat"></a-plane>
             </a-entity>
 
-            <!-- Connector line -->
             <a-plane width="0.004" height="0.26" color="#F9CF30" position="0 -0.52 0.01"
                 material="shader: flat; transparent: true; opacity: 0.6"></a-plane>
 
-            <!-- Info card -->
-            <a-entity position="0 -0.72 0.02">
+            <!-- THE TEXT FIX: scale="-1 1 1" flips the text back to normal so it remains completely readable -->
+            <a-entity position="0 -0.72 0.02" scale="-1 1 1">
+
                 <a-plane width="1.10" height="0.006" color="#F9CF30" position="0 0.175 0"
                     material="shader: flat"></a-plane>
+
                 <a-plane width="1.10" height="0.34" color="#000000" position="0 0 -0.005"
                     material="shader: flat; transparent: true; opacity: 0.72"></a-plane>
 
-                <a-text value="ERMAAN SINGH&#10;TAPFOLIO ARCHITECT" color="#F9CF30" align="left" width="0.82"
+                <a-text value="ERMAAN SINGH&#10;TAPFOLIO FOUNDER" color="#F9CF30" align="left" width="0.82"
                     wrap-count="24" position="-0.50 0.08 0" font="monoid" material="shader: flat"></a-text>
 
                 <a-plane width="0.004" height="0.22" color="#F9CF30" position="0.08 0 0"
                     material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
 
-                <a-text value="API SECURITY | LOCAL LLM&#10;OWASP TOP 10 | C++ / PY" color="#FFFFFF" align="left"
-                    width="0.76" wrap-count="24" position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
+                <a-text value="API SECURITY | C++ " color="#FFFFFF" align="left" width="0.76" wrap-count="24"
+                    position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
 
-                <a-text value="4.0 GPA  //  CLEARANCE: ADMIN  //  CYBER DEFENSE" color="#888888" align="center"
+                <a-text value="4.0 GPA  //  ROLE : STUDENT  //  CYBERSECURITY" color="#888888" align="center"
                     width="0.88" wrap-count="34" position="0 -0.12 0" font="monoid" material="shader: flat"></a-text>
 
                 <a-plane width="1.10" height="0.004" color="#333333" position="0 -0.172 0"
                     material="shader: flat"></a-plane>
+
             </a-entity>
 
         </a-entity>
-    </a-scene>
+        </a-scene>
+    </div>
 
     <script>
+        let arReady = false;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const sceneEl = document.querySelector('a-scene');
+
+            const onReady = () => { arReady = true; };
+
+            if (sceneEl.hasLoaded) {
+                onReady();
+            } else {
+                sceneEl.addEventListener('loaded', onReady);
+            }
+
+            sceneEl.addEventListener('arReady', () => { arReady = true; });
+        });
+
+        // RESTORED: Capture HUD completely simplified to match AR canvas exactly, stopping the stretching bug.
         function captureHUD() {
-            // Find the video dynamically appended to the body by MindAR
-            const video = document.querySelector('video');
+            const video = document.querySelector('#example-container video');
             const sceneEl = document.querySelector('a-scene');
 
             if (!video || !sceneEl || !sceneEl.components.screenshot) return;
@@ -164,11 +211,11 @@
             flash.style.opacity = '1';
             setTimeout(() => { flash.style.opacity = '0'; }, 150);
 
-            // Force WebGL to render right before capture
             sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
             const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
             if (!aframeCanvas) return;
 
+            // Use the exact dimensions of the A-Frame canvas to prevent stretching
             const cw = aframeCanvas.width;
             const ch = aframeCanvas.height;
 
@@ -177,8 +224,8 @@
             finalCanvas.height = ch;
             const ctx = finalCanvas.getContext('2d');
 
-            const vw = video.videoWidth;
-            const vh = video.videoHeight;
+            const vw = video.videoWidth || 1280;
+            const vh = video.videoHeight || 720;
             const videoRatio = vw / vh;
             const canvasRatio = cw / ch;
 
@@ -195,20 +242,15 @@
                 sy = (vh - sh) / 2;
             }
 
-            // 1. Draw raw video feed NORMALLY. 
-            // Raw webcam pixels are natively un-mirrored (true-to-life).
-            // Backgrounds and faces will look correct and readable.
-            ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
-
-            // 2. Draw AR Canvas. 
-            // The 3D AR canvas is mirrored natively for selfies. 
-            // To align it perfectly with the un-mirrored video, we MUST flip it.
-            // This un-mirrors the AR text and matches the brackets to the face.
             ctx.save();
+            // Flip the video context horizontally so it perfectly aligns with the HUD layer
             ctx.translate(cw, 0);
             ctx.scale(-1, 1);
-            ctx.drawImage(aframeCanvas, 0, 0, cw, ch);
+            ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
             ctx.restore();
+
+            // Draw HUD over the properly flipped and scaled video
+            ctx.drawImage(aframeCanvas, 0, 0, cw, ch);
 
             const link = document.createElement('a');
             link.download = 'TapFolio-Record.png';
