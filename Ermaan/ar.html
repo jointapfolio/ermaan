@@ -18,11 +18,10 @@
             width: 100vw;
             height: 100vh;
             background-color: transparent;
-            /* Changed to dark to prevent white flashes */
+            /* Master dev override applied */
             overflow: hidden;
         }
 
-        /* The master container */
         #example-container {
             width: 100vw;
             height: 100vh;
@@ -33,10 +32,6 @@
             z-index: 1;
         }
 
-        /* 
-           THE FIX: This strictly forces both the camera and the AR canvas to 
-           sit dead-center, fill the screen, and ignore any buggy margins.
-        */
         #example-container video,
         #example-container canvas {
             position: absolute !important;
@@ -93,26 +88,20 @@
             <div class="flex gap-2">
                 <div
                     class="text-xs font-mono font-bold text-white bg-black px-2 py-1 border border-[#F9CF30] flex items-center gap-2">
-                    LINK <span class="animate-pulse text-green-500">&#9679;</span>
+                    SYS_ACTIVE <span class="animate-pulse text-green-500">&#9679;</span>
                 </div>
             </div>
         </div>
 
-        <div class="text-center">
-            <button onclick="captureHUD()" class="brutalist-btn w-full max-w-sm mx-auto">
-                [ CAPTURE HOLOGRAM ]
-            </button>
-            <p class="text-[#F9CF30] font-mono text-xs mt-3 font-bold bg-black/50 inline-block px-2">
-                SCAN TAPFOLIO CARD
+        <div class="text-center pb-6">
+            <p
+                class="text-[#F9CF30] font-mono text-sm font-bold bg-black/80 inline-block px-4 py-2 border-2 border-[#F9CF30]">
+                [ SCAN TAPFOLIO CARD ]
             </p>
         </div>
     </div>
 
-    <div id="flash"
-        class="fixed inset-0 bg-white opacity-0 z-[1000] pointer-events-none transition-opacity duration-150"></div>
-
     <div id="example-container">
-        <!-- Added container: #example-container so MindAR knows exactly where to inject -->
         <a-scene
             mindar-image="imageTargetSrc: ./targets.mind; container: #example-container; filterMinCF: 0.1; filterBeta: 10;"
             color-space="sRGB" renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;"
@@ -121,6 +110,8 @@
             <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
             <a-entity mindar-image-target="targetIndex: 0">
+
+                <!-- Main Info Card -->
                 <a-entity position="0 0 0.1">
                     <a-plane width="1.10" height="0.006" color="#F9CF30" position="0 0.175 0"
                         material="shader: flat"></a-plane>
@@ -145,6 +136,7 @@
                         material="shader: flat"></a-plane>
                 </a-entity>
 
+                <!-- Corner Framing Brackets -->
                 <a-entity position="0 0 0.05">
                     <a-plane width="0.1" height="0.01" color="#F9CF30" position="-0.45 0.7 0"
                         material="shader: flat"></a-plane>
@@ -163,41 +155,10 @@
                     <a-plane width="0.01" height="0.1" color="#F9CF30" position="0.5 -0.65 0"
                         material="shader: flat"></a-plane>
                 </a-entity>
+
             </a-entity>
         </a-scene>
     </div>
-
-    <script>
-        function captureHUD() {
-            const video = document.querySelector('video');
-            const sceneEl = document.querySelector('a-scene');
-
-            if (!video || !sceneEl || !sceneEl.components.screenshot) return;
-
-            const flash = document.getElementById('flash');
-            flash.style.opacity = '1';
-            setTimeout(() => { flash.style.opacity = '0'; }, 150);
-
-            // Force synchronous render
-            sceneEl.renderer.render(sceneEl.object3D, sceneEl.camera);
-            const aframeCanvas = sceneEl.components.screenshot.getCanvas('perspective');
-            if (!aframeCanvas) return;
-
-            // Verified flawless capture logic
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            ctx.drawImage(aframeCanvas, 0, 0, canvas.width, canvas.height);
-
-            const link = document.createElement('a');
-            link.download = 'TapFolio-Card-Scan.png';
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
-        }
-    </script>
 </body>
 
 </html>
