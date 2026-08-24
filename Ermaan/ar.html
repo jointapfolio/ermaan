@@ -29,12 +29,11 @@
             overflow: hidden;
         }
 
-        /* FIX: MindAR injects a raw <video> element with its native camera
-           resolution (e.g. 1280x720). Without this, the video renders at
-           its intrinsic aspect ratio inside the full-screen container,
-           leaving black letterbox bars top/bottom. This makes it behave
-           like CSS `object-fit: cover` — fill the screen, crop overflow,
-           no stretching. */
+        /* FIX: MindAR injects a raw <video> element. We center it with object-fit: cover
+           to fill the screen. We also re-apply scaleX(-1) here because our !important
+           rule overrides MindAR's own mirror transform — without it, the video appears
+           un-mirrored but MindAR's 3D coordinate space is still in mirrored space,
+           causing the HUD to track in the opposite X direction to the face. */
         #example-container video {
             position: absolute !important;
             top: 50% !important;
@@ -43,7 +42,7 @@
             height: auto !important;
             min-width: 100% !important;
             min-height: 100% !important;
-            transform: translate(-50%, -50%) !important;
+            transform: translate(-50%, -50%) scaleX(-1) !important;
             object-fit: cover;
         }
 
@@ -96,15 +95,6 @@
             <a href="index.html" class="brutalist-btn" style="padding: 0.5rem 1rem; background: #FFFFFF;">&lt; BACK</a>
 
             <div class="flex gap-2">
-                <button onclick="flipCamera()" class="brutalist-btn" style="padding: 0.5rem; background: #FFFFFF;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 2v6h-6" />
-                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-                        <path d="M3 22v-6h6" />
-                        <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-                    </svg>
-                </button>
                 <div
                     class="text-xs font-mono font-bold text-white bg-black px-2 py-1 border border-[#F9CF30] flex items-center gap-2">
                     REC <span class="animate-pulse text-red-500">&#9679;</span>
@@ -128,14 +118,11 @@
 
     <div id="example-container">
         <script>
-            const urlParams = new URLSearchParams(window.location.search);
-            const camMode = urlParams.get('cam') === 'environment' ? 'environment' : 'user';
-            const mindarAttr = camMode === 'user'
-                ? 'mindar-face'
-                : 'mindar-face="facingMode: environment"';
-
+            // Always use the front camera with NO facingMode parameter.
+            // Omitting facingMode lets MindAR use its own default mirroring logic
+            // so the 3D coordinate space matches the mirrored video correctly.
             document.write(
-                '<a-scene ' + mindarAttr + ' embedded color-space="sRGB" ' +
+                '<a-scene mindar-face embedded color-space="sRGB" ' +
                 'renderer="colorManagement: true; preserveDrawingBuffer: true; alpha: true;" ' +
                 'vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">'
             );
@@ -214,8 +201,8 @@
                     material="shader: flat; transparent: true; opacity: 0.5"></a-plane>
 
                 <!-- Right section: Skills (white) -->
-                <a-text value="API SECURITY | LOCAL LLM | C++ / PY" color="#FFFFFF" align="left" width="0.76"
-                    wrap-count="24" position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
+                <a-text value="API SECURITY | C++ " color="#FFFFFF" align="left" width="0.76" wrap-count="24"
+                    position="0.12 0.08 0" font="monoid" material="shader: flat"></a-text>
 
                 <!-- Bottom metadata row (grey) -->
                 <a-text value="4.0 GPA  //  ROLE : STUDENT  //  CYBERSECURITY" color="#888888" align="center"
@@ -232,45 +219,16 @@
     </div> <!-- End wrapper div -->
 
     <script>
-        const _urlParams = new URLSearchParams(window.location.search);
-        let currentCam = _urlParams.get('cam') === 'environment' ? 'environment' : 'user';
         let arReady = false;
 
-        function applyVideoMirror() {
-            const video = document.querySelector('#example-container video');
-            if (!video) return;
-            // MindAR handles its own mirroring internally — do not fight it with scaleX(-1).
-            // Apply only the centering transform for both camera modes.
-            video.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
-        }
-
-        function updateLabel() {
-            const el = document.getElementById('cam-instruction');
-            el.innerText = currentCam === 'user' ? 'SELFIE MODE ALIGNED' : 'SCAN TARGET: ERMAAN';
-        }
-
-        function flipCamera() {
-            if (!arReady) return;
-            const sceneEl = document.querySelector('a-scene');
-            const arSystem = sceneEl.systems['mindar-face-system'];
-            if (!arSystem || typeof arSystem.switchCamera !== 'function') {
-                console.warn('MindAR switchCamera() not available on this version');
-                return;
-            }
-            arSystem.switchCamera();
-            currentCam = (currentCam === 'user') ? 'environment' : 'user';
-            updateLabel();
-            setTimeout(applyVideoMirror, 600);
-        }
+        // No camera switching — front camera only.
+        // The scaleX(-1) on the video CSS rule ensures the display is mirrored
+        // (natural selfie view) and MindAR's 3D tracking space matches it.
 
         window.addEventListener('DOMContentLoaded', () => {
             const sceneEl = document.querySelector('a-scene');
 
-            const onReady = () => {
-                arReady = true;
-                updateLabel();
-                setTimeout(applyVideoMirror, 800);
-            };
+            const onReady = () => { arReady = true; };
 
             if (sceneEl.hasLoaded) {
                 onReady();
@@ -278,10 +236,7 @@
                 sceneEl.addEventListener('loaded', onReady);
             }
 
-            sceneEl.addEventListener('arReady', () => {
-                arReady = true;
-                setTimeout(applyVideoMirror, 300);
-            });
+            sceneEl.addEventListener('arReady', () => { arReady = true; });
         });
 
         function captureHUD() {
@@ -328,10 +283,10 @@
             }
 
             ctx.save();
-            if (isSelfie) {
-                ctx.translate(cw, 0);
-                ctx.scale(-1, 1);
-            }
+            // Always selfie mode — flip canvas so the saved image is un-mirrored
+            // (the CSS scaleX(-1) on the video is display-only; raw pixels are un-flipped).
+            ctx.translate(cw, 0);
+            ctx.scale(-1, 1);
             ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
             ctx.restore();
 
